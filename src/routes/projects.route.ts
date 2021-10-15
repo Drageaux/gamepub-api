@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import ProjectsController from '@/controllers/projects.controller';
+import { CreateProjectDto } from '@/dtos/projects.dto';
 
 class ProjectsRoute implements Routes {
   public path = '/projects';
@@ -14,7 +15,7 @@ class ProjectsRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}/:id`, this.projectsController.getProjectById);
-    this.router.post(`${this.path}`, this.projectsController.createProject);
+    this.router.post(`${this.path}`, validationMiddleware(CreateProjectDto, 'body'), this.projectsController.createProject);
   }
 }
 

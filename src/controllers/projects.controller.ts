@@ -21,7 +21,7 @@ class ProjectsController {
     try {
       const projectId: string = req.params.id;
       console.log(projectId);
-      const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId }).populate('creator');
+      const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId });
       // TODO: access check, is this project public or does it belong to the user
 
       res.status(200).json({ data: findProjectByIdData, message: 'findOne' });
