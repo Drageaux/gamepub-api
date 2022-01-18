@@ -2,8 +2,7 @@ import { User } from './users.interface';
 
 export interface Project {
   _id: string;
-  creator: string | User;
+  creatorId: string; // User._id
   name: string;
-  ghOwner: string;
-  ghRepo: string;
+  githubProject?: string;
 }

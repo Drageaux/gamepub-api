@@ -6,7 +6,7 @@ export class CreateProjectDto {
   public name: string;
 
   @IsString()
-  public creator: string;
+  public creatorId: string;
 
   @IsOptional()
   @IsNotEmpty()
