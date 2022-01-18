@@ -8,13 +8,6 @@ export class CreateProjectDto {
   @IsString()
   public creatorId: string;
 
-  @IsOptional()
-  @IsNotEmpty()
   @IsString()
-  public ghOwner: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  public ghRepo: string;
+  public githubProject: string;
 }
