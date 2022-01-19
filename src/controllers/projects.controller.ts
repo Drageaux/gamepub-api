@@ -1,11 +1,13 @@
 import { Project } from '@/interfaces/project.interface';
 import { NextFunction, Request, Response } from 'express';
 import projectModel from '@/models/projects.model';
+import userModel from '@/models/users.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
 
 class ProjectsController {
   projects = projectModel;
+  users = userModel;
 
   // public getUsers = async (req: Request, res: Response, next: NextFunction) => {
   //   try {
@@ -37,6 +39,21 @@ class ProjectsController {
         ...req.body,
       });
       res.status(201).json({ data: createProjectData, message: 'created' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getProjectsByUsername = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const username: string = req.params.username;
+
+      const { _id } = await this.users.findOne({ username });
+      console.log(_id);
+      const findProjectsByUsername: Project[] = await this.projects.find({ creator: _id });
+      // TODO: access check, is this project public or does it belong to the user
+
+      res.status(200).json({ data: findProjectsByUsername, message: 'findProjectsByUsername' });
     } catch (error) {
       next(error);
     }
