@@ -5,5 +5,5 @@ export interface Project {
   _id: Types.ObjectId;
   creator: Types.ObjectId | User; // User._id
   name: string;
-  githubProject?: string;
+  githubRepo?: string;
 }
