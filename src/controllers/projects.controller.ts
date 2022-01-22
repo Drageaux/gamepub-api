@@ -5,6 +5,7 @@ import userModel from '@/models/users.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
 import projectsService from '@services/projects.service';
+import { CreateProjectDto } from '@/dtos/projects.dto';
 
 class ProjectsController {
   public projectsService = new projectsService();
@@ -37,10 +38,10 @@ class ProjectsController {
   public createProject = async (req: Request, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
     try {
-      const formattedProjName = this.projectsService.generateUniformProjectName(req.body.name);
+      const formattedProjName = this.projectsService.generateUniformProjectName(req.body.displayName);
       const createProjectData: Project = await this.projects.create({
         ...req.body,
-        formattedName: formattedProjName,
+        name: formattedProjName,
       });
       const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id).populate('creator');
 
