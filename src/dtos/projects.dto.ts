@@ -1,13 +1,14 @@
 import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateProjectDto {
-  @Length(2, 30)
+  @Length(3, 30)
   @IsString()
   public name: string;
 
   @IsString()
-  public creatorId: string;
+  public creator: string;
 
   @IsString()
-  public githubProject: string;
+  @IsOptional()
+  public githubRepo: string;
 }
