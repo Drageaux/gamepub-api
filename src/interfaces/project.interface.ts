@@ -6,4 +6,5 @@ export interface Project {
   creator: Types.ObjectId | User; // User._id
   name: string;
   githubRepo?: string;
+  formattedName?: string;
 }
