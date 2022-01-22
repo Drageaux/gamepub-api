@@ -4,8 +4,10 @@ import projectModel from '@/models/projects.model';
 import userModel from '@/models/users.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
+import projectsService from '@services/projects.service';
 
 class ProjectsController {
+  public projectsService = new projectsService();
   projects = projectModel;
   users = userModel;
 
@@ -35,10 +37,14 @@ class ProjectsController {
   public createProject = async (req: Request, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
     try {
+      const formattedProjName = this.projectsService.generateUniformProjectName(req.body.name);
       const createProjectData: Project = await this.projects.create({
         ...req.body,
+        formattedName: formattedProjName,
       });
-      res.status(201).json({ data: createProjectData, message: 'created' });
+      const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id).populate('creator');
+
+      res.status(201).json({ data: findPopulatedProjectData, message: 'created' });
     } catch (error) {
       next(error);
     }
