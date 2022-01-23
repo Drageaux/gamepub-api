@@ -14,6 +14,7 @@ class ProjectsRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.get(`/users/:username${this.path}/:projectname`, this.projectsController.getProjectByFullPath);
     this.router.get(`${this.path}/:id`, this.projectsController.getProjectById);
     this.router.get(`/users/:username${this.path}`, this.projectsController.getProjectsByUsername);
     this.router.post(`${this.path}`, validationMiddleware(CreateProjectDto, 'body'), this.projectsController.createProject);

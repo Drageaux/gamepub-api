@@ -5,7 +5,7 @@ import userModel from '@/models/users.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
 import projectsService from '@services/projects.service';
-import { CreateProjectDto } from '@/dtos/projects.dto';
+import { User } from '@/interfaces/users.interface';
 
 class ProjectsController {
   public projectsService = new projectsService();
@@ -25,11 +25,26 @@ class ProjectsController {
   public getProjectById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const projectId: string = req.params.id;
-      console.log(projectId);
       const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId });
       // TODO: access check, is this project public or does it belong to the user
 
       res.status(200).json({ data: findProjectByIdData, message: 'findOne' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getProjectByFullPath = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const username: string = req.params.username as string;
+      const name: string = (req.params.projectname as string).toLocaleLowerCase();
+      const user: User = await this.users.findOne({ username });
+      // what if user is deleted and the project can't be found this way?
+      if (user === null || !user._id) throw Error(`User ${username} does not exist`);
+      const findProjectByNameData: Project = await this.projects.findOne({ name, creator: user._id });
+      // TODO: access check, is this project public or does it belong to the user
+
+      res.status(200).json({ data: findProjectByNameData, message: 'findOne' });
     } catch (error) {
       next(error);
     }
