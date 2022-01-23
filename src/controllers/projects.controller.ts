@@ -53,10 +53,8 @@ class ProjectsController {
   public createProject = async (req: Request, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
     try {
-      const formattedProjName = this.projectsService.generateUniformProjectName(req.body.displayName);
       const createProjectData: Project = await this.projects.create({
         ...req.body,
-        name: formattedProjName,
       });
       const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id).populate({ path: 'creator', select: 'username' });
 
