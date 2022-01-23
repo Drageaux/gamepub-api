@@ -25,7 +25,7 @@ class ProjectsController {
   public getProjectById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const projectId: string = req.params.id;
-      const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId });
+      const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId }).populate('creator');
       // TODO: access check, is this project public or does it belong to the user
 
       res.status(200).json({ data: findProjectByIdData, message: 'findOne' });
@@ -58,7 +58,7 @@ class ProjectsController {
         ...req.body,
         name: formattedProjName,
       });
-      const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id).populate('creator');
+      const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id).populate({ path: 'creator', select: 'username' });
 
       res.status(201).json({ data: findPopulatedProjectData, message: 'created' });
     } catch (error) {
