@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { IsOptional, IsString, Length, ValidateIf } from 'class-validator';
 
 export class CreateProjectDto {
   @Length(3, 30)
@@ -8,6 +8,7 @@ export class CreateProjectDto {
   @IsString()
   public creator: string;
 
+  @ValidateIf((obj, val) => val != null && val != '')
   @Length(3, 30)
   @IsString()
   @IsOptional()
