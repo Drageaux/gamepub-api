@@ -78,6 +78,23 @@ class ProjectsController {
       next(error);
     }
   };
+
+  public checkName = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const name = req.body.name;
+      const creator = req.body.creator;
+
+      const checkIfNameExists: Project = await this.projects.findOne({ creator, name });
+
+      if (checkIfNameExists) {
+        res.status(422).json({ message: 'nameDuplicateFound' });
+      } else {
+        res.status(200).json({ message: 'nameIsAvailable' });
+      }
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default ProjectsController;
