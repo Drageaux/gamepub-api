@@ -1,15 +1,15 @@
 process.env['NODE_CONFIG_DIR'] = __dirname + '/configs';
 
+import config from 'config';
 import express from 'express';
 
 import compression from 'compression';
-import config from 'config';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import morgan from 'morgan';
 import { connect, set } from 'mongoose';
+import cors from 'cors';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
@@ -32,7 +32,7 @@ class App {
     this.env = process.env.NODE_ENV || 'development';
 
     this.connectToDatabase();
-    // this.configureCloudinary();
+    this.configureCloudinary();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
@@ -63,7 +63,6 @@ class App {
   private configureCloudinary() {
     const cldnry = cloudinary.v2;
     const { name, key, secret }: cloudinaryConfig = config.get('cloudinary');
-    // console.log('hey')
     cldnry.config({
       cloud_name: name,
       api_key: key,
@@ -84,7 +83,6 @@ class App {
 
   private initializeRoutes(routes: Routes[]) {
     routes.forEach(route => {
-      console.log('test');
       this.app.use('/', route.router);
     });
   }

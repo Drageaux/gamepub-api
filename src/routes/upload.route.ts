@@ -5,7 +5,7 @@ import UploadController from '@controllers/upload.controller';
 class UploadRoute implements Routes {
   public path = '/upload';
   public router = Router();
-  private uploadController = new UploadController();
+  public uploadController = new UploadController();
 
   constructor() {
     this.initializeRoutes();
