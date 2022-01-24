@@ -1,20 +1,22 @@
 process.env['NODE_CONFIG_DIR'] = __dirname + '/configs';
 
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import config from 'config';
-import express from 'express';
-import helmet from 'helmet';
-import hpp from 'hpp';
-import morgan from 'morgan';
-import { connect, set } from 'mongoose';
-import swaggerJSDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
 import { dbConnection } from '@databases';
+import { cloudinaryConfig } from '@interfaces/cloudinary-config.interface';
 import { Routes } from '@interfaces/routes.interface';
 import errorMiddleware from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
+import cloudinary from 'cloudinary';
+import compression from 'compression';
+import config from 'config';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
+import helmet from 'helmet';
+import hpp from 'hpp';
+import { connect, set } from 'mongoose';
+import morgan from 'morgan';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 class App {
   public app: express.Application;
@@ -27,6 +29,7 @@ class App {
     this.env = process.env.NODE_ENV || 'development';
 
     this.connectToDatabase();
+    this.configureCloudinary();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
@@ -52,6 +55,16 @@ class App {
     }
 
     connect(dbConnection.url, dbConnection.options);
+  }
+
+  private configureCloudinary() {
+    const cldnry = cloudinary.v2;
+    const { name, key, secret }: cloudinaryConfig = config.get('cloudinary');
+    cldnry.config({
+      cloud_name: name,
+      api_key: key,
+      api_secret: secret,
+    });
   }
 
   private initializeMiddlewares() {
