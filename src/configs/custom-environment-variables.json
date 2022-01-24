@@ -5,6 +5,7 @@
   "cloudinary": {
     "name": "CLOUDINARY_CLOUD",
     "key": "CLOUDINARY_KEY",
-    "secret": "CLOUDINARY_SECRET"
+    "secret": "CLOUDINARY_SECRET",
+    "url": "CLOUDINARY_URL"
   }
 }
