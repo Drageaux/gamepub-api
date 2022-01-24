@@ -57,7 +57,10 @@ class App {
       set('debug', true);
     }
 
-    connect(dbConnection.url, dbConnection.options);
+    // IMPORTANT: If changing IP, need to allow in online Network Access
+    connect(dbConnection.url, dbConnection.options, err => {
+      if (err) console.error(err);
+    });
   }
 
   private configureCloudinary() {
