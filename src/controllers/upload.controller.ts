@@ -6,11 +6,11 @@ class UploadController {
 
   public upload = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log(req);
       const uploadBody = req.body;
-      // this.cloudinaryService.uploadImage(uploadBody);
+      console.log(uploadBody);
+      await this.cloudinaryService.uploadImage(uploadBody);
 
-      res.status(201).json({ data: {}, message: 'created' });
+      res.status(201).json({ data: {}, message: 'uploaded' });
     } catch (error) {
       next(error);
     }
