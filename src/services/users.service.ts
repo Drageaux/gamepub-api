@@ -34,8 +34,10 @@ class UserService {
   public async createUser(userData: CreateUserDto): Promise<User> {
     if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
 
-    const findUser: User = await this.users.findOne({ email: userData.email });
-    if (findUser) throw new HttpException(409, `Your email ${userData.email} already exists`);
+    const findUserByEmail: User = await this.users.findOne({ email: userData.email });
+    const findUserByUsername: User = await this.users.findOne({ username: userData.username });
+    if (findUserByEmail) throw new HttpException(409, `The email ${userData.email} is already registered.`);
+    if (findUserByUsername) throw new HttpException(409, `The username ${userData.username} is already taken.`);
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const createUserData: User = await this.users.create({ ...userData, password: hashedPassword });
