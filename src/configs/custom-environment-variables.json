@@ -1,0 +1,10 @@
+{
+  "dbConfig": {
+    "mongodb": "MONGODB_URI"
+  },
+  "cloudinary": {
+    "name": "CLOUDINARY_CLOUD",
+    "key": "CLOUDINARY_KEY",
+    "secret": "CLOUDINARY_SECRET"
+  }
+}
