@@ -106,7 +106,7 @@ class ProjectsController {
       if (!findProjectData) throw Error(`Can't find project with ID ${projId}`);
 
       const image = req.body.image;
-      const uploadImageData: UploadApiResponse = await this.cloudinaryService.uploadImage(image);
+      const uploadImageData: UploadApiResponse = await this.cloudinaryService.uploadImage(image, { public_id: projId, overwrite: true });
 
       const updateProjectById: Project = await this.projects.findByIdAndUpdate(projId, { imageUrl: uploadImageData.secure_url });
       res.status(200).json({ data: updateProjectById, message: 'updateProjectImage' });

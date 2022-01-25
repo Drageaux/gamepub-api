@@ -8,9 +8,9 @@ import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 // 409: Already exists.
 
 class CloudinaryService {
-  public async uploadImage(file: string): Promise<UploadApiResponse> {
+  public async uploadImage(file: string, options?): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
-      cloudinary.uploader.upload(file, (err, res: UploadApiResponse) => {
+      cloudinary.uploader.upload(file, options, (err, res: UploadApiResponse) => {
         if (err) {
           console.error(err);
           reject(err);
