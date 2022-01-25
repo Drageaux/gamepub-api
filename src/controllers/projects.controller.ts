@@ -5,10 +5,13 @@ import userModel from '@/models/users.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
 import projectsService from '@services/projects.service';
+import cloudinaryService from '@services/cloudinary.service';
 import { User } from '@/interfaces/users.interface';
+import { CloudinaryUploadResponse } from '@/interfaces/cloudinary-upload-response.interface';
 
 class ProjectsController {
   public projectsService = new projectsService();
+  public cloudinaryService = new cloudinaryService();
   projects = projectModel;
   users = userModel;
 
@@ -91,6 +94,16 @@ class ProjectsController {
       } else {
         res.status(200).json({ message: 'nameIsAvailable' });
       }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateProjectImage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const image = req.body.image;
+      const uploadImageData: CloudinaryUploadResponse = await this.cloudinaryService.uploadImage(image);
+      res.status(200).json({ data: uploadImageData, message: 'updateProjectImage' });
     } catch (error) {
       next(error);
     }
