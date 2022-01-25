@@ -3,6 +3,7 @@ import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import ProjectsController from '@/controllers/projects.controller';
 import { CreateProjectDto } from '@/dtos/projects.dto';
+import express from 'express';
 
 class ProjectsRoute implements Routes {
   public path = '/projects';
@@ -16,7 +17,7 @@ class ProjectsRoute implements Routes {
   private initializeRoutes() {
     this.router.get(`/users/:username${this.path}/:projectname`, this.projectsController.getProjectByFullPath);
     this.router.get(`${this.path}/:id`, this.projectsController.getProjectById);
-    this.router.put(`${this.path}/:id/image`, this.projectsController.updateProjectImage);
+    this.router.put(`${this.path}/:id/image`, express.json({ limit: '4mb' }), this.projectsController.updateProjectImage);
     this.router.get(`/users/:username${this.path}`, this.projectsController.getProjectsByUsername);
     this.router.post(`${this.path}/check-name`, this.projectsController.checkName);
     this.router.post(`${this.path}`, validationMiddleware(CreateProjectDto, 'body'), this.projectsController.createProject);
