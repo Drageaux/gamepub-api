@@ -21,7 +21,7 @@ class CloudinaryService {
     });
   }
 
-  private getBase64(file): Promise<string> {
+  private getBase64(file): Promise<string | ArrayBuffer> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
