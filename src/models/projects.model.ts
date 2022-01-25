@@ -6,6 +6,7 @@ const projectSchema: Schema = new Schema({
   name: { type: String, required: true },
   githubRepo: String,
   displayName: String,
+  imageUrl: String,
 }).index({ creator: 1, name: 1 }, { unique: true });
 
 const projectModel = model<Project & Document>('Project', projectSchema);

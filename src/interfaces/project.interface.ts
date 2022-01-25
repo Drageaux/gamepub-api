@@ -7,4 +7,5 @@ export interface Project {
   name: string;
   displayName?: string;
   githubRepo?: string;
+  imageUrl?: string;
 }
