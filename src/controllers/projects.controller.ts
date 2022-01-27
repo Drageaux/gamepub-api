@@ -15,15 +15,16 @@ class ProjectsController {
   projects = projectModel;
   users = userModel;
 
-  // public getUsers = async (req: Request, res: Response, next: NextFunction) => {
-  //   try {
-  //     const findAllUsersData: User[] = await this.userService.findAllUser();
+  public getProjects = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // TODO: query with options
+      const findAllProjectsData: Project[] = await this.projects.find();
 
-  //     res.status(200).json({ data: findAllUsersData, message: 'findAll' });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
+      res.status(200).json({ data: findAllProjectsData, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
 
   public getProjectById = async (req: Request, res: Response, next: NextFunction) => {
     try {

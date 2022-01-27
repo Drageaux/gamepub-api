@@ -15,6 +15,7 @@ class ProjectsRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.get(`${this.path}`, this.projectsController.getProjects);
     this.router.get(`/users/:username${this.path}/:projectname`, this.projectsController.getProjectByFullPath);
     this.router.get(`${this.path}/:id`, this.projectsController.getProjectById);
     this.router.put(`${this.path}/:id/image`, express.json({ limit: '4mb' }), this.projectsController.updateProjectImage);
