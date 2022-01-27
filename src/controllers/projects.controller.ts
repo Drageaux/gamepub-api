@@ -7,7 +7,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import projectsService from '@services/projects.service';
 import cloudinaryService from '@services/cloudinary.service';
 import { User } from '@/interfaces/users.interface';
-import { UploadApiResponse } from 'cloudinary';
+import { UploadApiResponse, ResourceOptions } from 'cloudinary';
 
 class ProjectsController {
   public projectsService = new projectsService();
@@ -106,7 +106,11 @@ class ProjectsController {
       if (!findProjectData) throw Error(`Can't find project with ID ${projId}`);
 
       const image = req.body.image;
-      const uploadImageData: UploadApiResponse = await this.cloudinaryService.uploadImage(image, { public_id: projId, overwrite: true });
+      const uploadImageData: UploadApiResponse = await this.cloudinaryService.uploadImage(image, {
+        public_id: projId,
+        overwrite: true,
+        invalidate: true,
+      } as ResourceOptions);
 
       const updateProjectById: Project = await this.projects.findByIdAndUpdate(projId, { imageUrl: uploadImageData.secure_url });
       res.status(200).json({ data: updateProjectById, message: 'updateProjectImage' });
