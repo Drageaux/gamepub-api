@@ -1,4 +1,4 @@
-import { IsOptional, IsString, Length, ValidateIf } from 'class-validator';
+import { IsArray, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
 
 export class CreateProjectDto {
   @Length(3, 35)
@@ -17,4 +17,16 @@ export class CreateProjectDto {
   @IsString()
   @IsOptional()
   public githubRepo: string;
+
+  @IsArray()
+  @IsOptional()
+  public tags: string[];
+
+  @IsString()
+  @IsOptional()
+  public description: string;
+
+  @IsString()
+  @IsOptional()
+  public imageUrl: string;
 }
