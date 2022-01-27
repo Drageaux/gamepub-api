@@ -33,10 +33,11 @@ class App {
 
     this.connectToDatabase();
     this.configureCloudinary();
+    // TODO: File size limit isn't working
     // Init routes first to declare endpoint-specific middleware (file size limit)
     // NOT sure of the consequences, but for now it works
-    this.initializeRoutes(routes);
     this.initializeMiddlewares();
+    this.initializeRoutes(routes);
     this.initializeSwagger();
     this.initializeErrorHandling();
   }
