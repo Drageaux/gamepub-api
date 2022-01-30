@@ -9,6 +9,10 @@ import cloudinaryService from '@services/cloudinary.service';
 import { User } from '@/interfaces/users.interface';
 import { UploadApiResponse, ResourceOptions } from 'cloudinary';
 
+const MAX_PER_PAGE = 100;
+const DEFAULT_PER_PAGE = 20;
+const DEFAULT_PAGE = 0;
+
 class ProjectsController {
   public projectsService = new projectsService();
   public cloudinaryService = new cloudinaryService();
@@ -17,8 +21,14 @@ class ProjectsController {
 
   public getProjects = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const per_page = Math.min(MAX_PER_PAGE, parseInt((req.query.per_page as string) || '0') || DEFAULT_PER_PAGE);
+      const page = parseInt(req.query.page as string) || DEFAULT_PAGE;
+
       // TODO: query with options
-      const findAllProjectsData: Project[] = await this.projects.find();
+      const findAllProjectsData: Project[] = await this.projects
+        .find()
+        .limit(per_page)
+        .skip(per_page * page);
 
       res.status(200).json({ data: findAllProjectsData, message: 'findAll' });
     } catch (error) {
