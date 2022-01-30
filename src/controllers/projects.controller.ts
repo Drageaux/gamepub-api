@@ -28,8 +28,8 @@ class ProjectsController {
       const findAllProjectsData: Project[] = await this.projects
         .find()
         .limit(per_page)
-        .skip(per_page * page);
-
+        .skip(per_page * page)
+        .populate('creator');
       res.status(200).json({ data: findAllProjectsData, message: 'findAll' });
     } catch (error) {
       next(error);
