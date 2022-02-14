@@ -123,7 +123,7 @@ class ProjectsController {
         invalidate: true,
       } as ResourceOptions);
 
-      const updateProjectById: Project = await this.projects.findByIdAndUpdate(projId, { imageUrl: uploadImageData.secure_url });
+      const updateProjectById: Project = await this.projects.findByIdAndUpdate(projId, { imageUrl: uploadImageData.secure_url }, { new: true });
       res.status(200).json({ data: updateProjectById, message: 'updateProjectImage' });
     } catch (error) {
       next(error);
