@@ -41,6 +41,19 @@ class JobsController {
       next(error);
     }
   };
+
+  public getJobsByProjectId = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const projectId = (req.params.projectid as string).toLocaleLowerCase();
+      const findProject: Project = await this.projects.findById(projectId);
+
+      const findJobsByProject: Job[] = await this.jobs.find({ project: findProject._id });
+
+      res.status(201).json({ data: findJobsByProject, message: 'findByProjectId' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default JobsController;

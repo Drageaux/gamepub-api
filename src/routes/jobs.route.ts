@@ -5,7 +5,7 @@ import validationMiddleware from '@/middlewares/validation.middleware';
 import { CreateJobDto } from '@/dtos/jobs.dto';
 
 class JobsRoute implements Routes {
-  public path = '/projects';
+  public path = '/jobs';
   public router = Router();
   public jobsController = new JobsController();
 
@@ -14,8 +14,9 @@ class JobsRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post(`/users/:username${this.path}/:projectname/jobs`, validationMiddleware(CreateJobDto, 'body'), this.jobsController.createJob);
-    this.router.get(`/users/:username${this.path}/:projectname/jobs`, this.jobsController.getJobsByProjectFullPath);
+    this.router.post(`/users/:username/projects/:projectname/jobs`, validationMiddleware(CreateJobDto, 'body'), this.jobsController.createJob);
+    this.router.get(`/users/:username/projects/:projectname/jobs`, this.jobsController.getJobsByProjectFullPath);
+    this.router.get(`/projects/:projectid/jobs`, this.jobsController.getJobsByProjectId);
   }
 }
 
