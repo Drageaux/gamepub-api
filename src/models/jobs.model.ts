@@ -9,6 +9,5 @@ const jobSchema: Schema = new Schema({
 });
 
 const jobModel = model<Job & Document>('Job', jobSchema);
-jobModel.createIndexes();
 
 export default jobModel;
