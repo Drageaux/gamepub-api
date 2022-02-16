@@ -50,9 +50,7 @@ class ProjectsController {
 
   getProjectByFullPath = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const username: string = req.params.username as string;
-      const name: string = (req.params.projectname as string).toLocaleLowerCase();
-      const findProjectByNameData = this.projectsService.getProjectByCreatorAndName(username, name);
+      const findProjectByNameData: Project = await this.projectsService.getProjectByCreatorAndName(req);
 
       res.status(200).json({ data: findProjectByNameData, message: 'findOne' });
     } catch (error) {

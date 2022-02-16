@@ -19,7 +19,6 @@ class ProjectsService {
 
     // TODO: access check, is this project public or does it belong to the user
     const findProjectByNameData: Project = await this.projects.findOne({ name: projectname, creator: user._id });
-
     if (!findProjectByNameData) throw new HttpException(404, `Project ${projectname} by ${username} does not exist`);
     return findProjectByNameData;
   }
