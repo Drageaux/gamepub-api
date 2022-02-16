@@ -52,11 +52,7 @@ class ProjectsController {
     try {
       const username: string = req.params.username as string;
       const name: string = (req.params.projectname as string).toLocaleLowerCase();
-      const user: User = await this.users.findOne({ username });
-      // what if user is deleted and the project can't be found this way?
-      if (user === null || !user._id) throw Error(`User ${username} does not exist`);
-      const findProjectByNameData: Project = await this.projects.findOne({ name, creator: user._id });
-      // TODO: access check, is this project public or does it belong to the user
+      const findProjectByNameData = this.projectsService.getProjectByCreatorAndName(username, name);
 
       res.status(200).json({ data: findProjectByNameData, message: 'findOne' });
     } catch (error) {
