@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import JobsController from '@/controllers/jobs.controller';
+import validationMiddleware from '@/middlewares/validation.middleware';
+import { CreateJobDto } from '@/dtos/jobs.dto';
 
 class JobsRoute implements Routes {
   public path = '/projects';
@@ -12,7 +14,7 @@ class JobsRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post(`/users/:username${this.path}/:projectname/jobs`, this.jobsController.createJob);
+    this.router.post(`/users/:username${this.path}/:projectname/jobs`, validationMiddleware(CreateJobDto, 'body'), this.jobsController.createJob);
   }
 }
 
