@@ -15,11 +15,9 @@ class JobsController {
   public projectsService = new projectsService();
 
   public createJob = async (req: Request, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
+    if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
-      const username: string = (req.params.username as string).toLocaleLowerCase();
-      const name: string = (req.params.projectname as string).toLocaleLowerCase();
-      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(username, name);
+      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
 
       const createJobData: Job = await this.jobs.create({
         project: findProject._id,
@@ -27,6 +25,18 @@ class JobsController {
       });
 
       res.status(201).json({ data: createJobData, message: 'created' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getJobsByProjectFullPath = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
+
+      const findJobsByProject: Job[] = await this.jobs.find({ project: findProject._id });
+
+      res.status(201).json({ data: findJobsByProject, message: 'findByProject' });
     } catch (error) {
       next(error);
     }
