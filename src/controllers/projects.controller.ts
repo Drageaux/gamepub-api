@@ -6,7 +6,6 @@ import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
 import projectsService from '@services/projects.service';
 import cloudinaryService from '@services/cloudinary.service';
-import { User } from '@/interfaces/users.interface';
 import { UploadApiResponse, ResourceOptions } from 'cloudinary';
 
 const MAX_PER_PAGE = 100;
