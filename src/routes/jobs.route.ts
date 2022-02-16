@@ -15,6 +15,7 @@ class JobsRoute implements Routes {
 
   private initializeRoutes() {
     this.router.post(`/users/:username${this.path}/:projectname/jobs`, validationMiddleware(CreateJobDto, 'body'), this.jobsController.createJob);
+    this.router.get(`/users/:username${this.path}/:projectname/jobs`, this.jobsController.getJobsByProjectFullPath);
   }
 }
 
