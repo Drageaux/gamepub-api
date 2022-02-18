@@ -1,7 +1,7 @@
 import { IsArray, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
 
 export class CreateProjectDto {
-  @Length(3, 35)
+  @Length(3, 100)
   @IsString()
   public name: string;
 
@@ -9,7 +9,7 @@ export class CreateProjectDto {
   public creator: string;
 
   @ValidateIf((obj, val) => val != null && val != '')
-  @Length(3, 50)
+  @Length(3, 100)
   @IsString()
   @IsOptional()
   public displayName: string;
