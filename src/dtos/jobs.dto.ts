@@ -12,3 +12,8 @@ export class CreateJobDto {
   @IsOptional()
   public imageUrl: string;
 }
+
+export class CreateJobCommentDto {
+  @IsString()
+  public body: string;
+}

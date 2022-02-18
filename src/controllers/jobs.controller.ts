@@ -16,22 +16,6 @@ class JobsController {
   public projectsService = new projectsService();
   public jobsService = new jobsService();
 
-  public createJob = async (req: Request, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
-    try {
-      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
-
-      const createJobData: Job = await this.jobs.create({
-        project: findProject._id,
-        ...req.body,
-      });
-
-      res.status(201).json({ data: createJobData, message: 'created' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
   /**
    * Receive {username} and {projectname} params and find jobs by project.
    *
@@ -64,6 +48,22 @@ class JobsController {
       const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(projectId);
 
       res.status(201).json({ data: findJobsByProject, message: 'findByProjectId' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public createJob = async (req: Request, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
+    try {
+      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
+
+      const createJobData: Job = await this.jobs.create({
+        project: findProject._id,
+        ...req.body,
+      });
+
+      res.status(201).json({ data: createJobData, message: 'created' });
     } catch (error) {
       next(error);
     }

@@ -1,3 +1,4 @@
+import { CreateJobCommentDto } from './../dtos/jobs.dto';
 import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import JobsController from '@/controllers/jobs.controller';
@@ -14,9 +15,14 @@ class JobsRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post(`/users/:username/projects/:projectname/jobs`, validationMiddleware(CreateJobDto, 'body'), this.jobsController.createJob);
     this.router.get(`/users/:username/projects/:projectname/jobs`, this.jobsController.getJobsByProjectFullPath);
     this.router.get(`/projects/:projectid/jobs`, this.jobsController.getJobsByProjectId);
+    this.router.post(`/users/:username/projects/:projectname/jobs`, validationMiddleware(CreateJobDto, 'body'), this.jobsController.createJob);
+    this.router.post(
+      `/users/:username/projects/:projectname/jobs/:jobid/comments`,
+      validationMiddleware(CreateJobCommentDto, 'body'),
+      this.jobsController,
+    );
   }
 }
 
