@@ -9,3 +9,10 @@ export interface Job {
   body?: string;
   imageUrl?: string;
 }
+
+export interface JobComment {
+  _id: Types.ObjectId;
+  project: Types.ObjectId | Project;
+  job: Types.ObjectId | Job;
+  body: string;
+}

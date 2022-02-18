@@ -15,13 +15,16 @@ class JobsRoute implements Routes {
   }
 
   private initializeRoutes() {
+    // jobs
     this.router.get(`/users/:username/projects/:projectname/jobs`, this.jobsController.getJobsByProjectFullPath);
     this.router.get(`/projects/:projectid/jobs`, this.jobsController.getJobsByProjectId);
     this.router.post(`/users/:username/projects/:projectname/jobs`, validationMiddleware(CreateJobDto, 'body'), this.jobsController.createJob);
+    // job comments
+    this.router.get(`/users/:username/projects/:projectname/jobs/:jobnumber/comments`, this.jobsController.getJobComments);
     this.router.post(
-      `/users/:username/projects/:projectname/jobs/:jobid/comments`,
+      `/users/:username/projects/:projectname/jobs/:jobnumber/comments`,
       validationMiddleware(CreateJobCommentDto, 'body'),
-      this.jobsController,
+      this.jobsController.postJobComment,
     );
   }
 }
