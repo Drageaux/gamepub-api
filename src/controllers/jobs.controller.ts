@@ -78,7 +78,7 @@ class JobsController {
       const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(findProject?._id.toString());
 
       const job: Job = findJobsByProject[jobNumber - 1];
-      if (!job) throw new HttpException(404, `This job ${jobNumber} doesn't exist`);
+      if (!job) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
 
       const findCommentsByJob: JobComment[] = await this.jobComments.find({
         project: findProject._id,
