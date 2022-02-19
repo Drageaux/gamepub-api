@@ -65,7 +65,10 @@ class JobsController {
         ...req.body,
       });
 
-      res.status(201).json({ data: createJobData, message: 'created' });
+      const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(findProject._id.toString());
+      const newJobWithNumber = findJobsByProject.find(x => x._id.toString() == createJobData._id.toString());
+
+      res.status(201).json({ data: newJobWithNumber, message: 'created' });
     } catch (error) {
       next(error);
     }
