@@ -74,6 +74,21 @@ class JobsController {
     }
   };
 
+  public getJobByJobNumber = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const jobNumber = parseInt(req.params.jobnumber as string);
+      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
+      const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(findProject?._id.toString());
+
+      const job: Job = findJobsByProject[jobNumber - 1];
+      if (!job) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
+
+      res.status(201).json({ data: job, message: 'findone' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getJobComments = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const jobNumber = parseInt(req.params.jobnumber as string);
