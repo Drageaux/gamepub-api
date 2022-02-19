@@ -15,7 +15,10 @@ class JobsRoute implements Routes {
   }
 
   private initializeRoutes() {
-    // jobs
+    // public jobs
+    this.router.get(`${this.path}`, this.jobsController.getJobs);
+
+    // project-specific jobs
     this.router.get(`/users/:username/projects/:projectname/jobs`, this.jobsController.getJobsByProjectFullPath);
     this.router.get(`/users/:username/projects/:projectname/jobs/:jobnumber`, this.jobsController.getJobByJobNumber);
     this.router.get(`/projects/:projectid/jobs`, this.jobsController.getJobsByProjectId);

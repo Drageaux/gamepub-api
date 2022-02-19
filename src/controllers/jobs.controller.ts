@@ -18,6 +18,16 @@ class JobsController {
   public projectsService = new projectsService();
   public jobsService = new jobsService();
 
+  public getJobs = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const findJobs: Job[] = await this.jobs.find();
+
+      res.status(201).json({ data: findJobs, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /**
    * Receive {username} and {projectname} params and find jobs by project.
    *
