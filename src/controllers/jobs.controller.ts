@@ -20,7 +20,7 @@ class JobsController {
 
   public getJobs = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const findJobs: Job[] = await this.jobs.find();
+      const findJobs: Job[] = await this.jobs.find().populate('project');
 
       res.status(201).json({ data: findJobs, message: 'findAll' });
     } catch (error) {
@@ -109,7 +109,6 @@ class JobsController {
       if (!job) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
 
       const findCommentsByJob: JobComment[] = await this.jobComments.find({
-        project: findProject._id,
         job: job._id,
       });
 
