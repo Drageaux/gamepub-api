@@ -77,17 +77,12 @@ class JobsController {
   public createJob = async (req: Request, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
-      const username: string = (req.params.username as string).toLocaleLowerCase();
-      const projectname: string = (req.params.projectname as string).toLocaleLowerCase();
-      const user: User = await this.users.findOne({ username });
-      if (!user?._id) throw new HttpException(404, `User ${username} does not exist`);
-
-      const findProject = await this.projects.findOne({ name: projectname, creator: user._id });
-
-      const newJobData: HydratedDocument<Job> = await this.jobs.create({ projectId: findProject._id, ...req.body });
+      const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+      const newJobData: HydratedDocument<Job> = await this.jobs.create({ project: findProject._id, ...req.body });
 
       const updateProject = await this.projects
-        .findOneAndUpdate(
+        .findByIdAndUpdate(
+          findProject._id,
           {
             $push: {
               jobs: newJobData._id,
@@ -96,11 +91,12 @@ class JobsController {
           { new: true },
         )
         .populate('jobs')
-        .sort({ createdAt: 1 });
+        .sort({ createdAt: 1 }); // sort to add number
 
-      console.log(updateProject);
+      const jobNumber = updateProject.jobs.findIndex(x => x._id.toString() == newJobData._id.toString()) + 1;
+      const newJobWithJobNumberData = await this.jobs.findByIdAndUpdate(newJobData._id, { jobNumber }, { new: true });
 
-      res.status(201).json({ data: newJobData.toObject({ virtuals: true }), message: 'created' });
+      res.status(201).json({ data: newJobWithJobNumberData, message: 'created' });
     } catch (error) {
       next(error);
     }
