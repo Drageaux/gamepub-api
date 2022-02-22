@@ -80,6 +80,8 @@ class JobsController {
       const findProject = await this.projectsService.getProjectByCreatorAndName(req);
       const newJobData: HydratedDocument<Job> = await this.jobs.create({ project: findProject._id, ...req.body });
 
+      // suppose there are many pushes at nearly the same moment
+      // they will still be sorted by creation date before getting assigned a job number
       const updateProject = await this.projects
         .findByIdAndUpdate(
           findProject._id,
