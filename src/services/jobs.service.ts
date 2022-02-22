@@ -14,7 +14,12 @@ class JobsService {
 
     const jobsPopulatedProject = await findProject.populate('jobs');
 
-    const findJob = jobsPopulatedProject.jobs.find(x => x.jobNumber === jobNumber);
+    const findJob = jobsPopulatedProject.jobs
+      .find(x => x.jobNumber === jobNumber)
+      .populate({
+        path: 'project',
+        populate: { path: 'creator' },
+      });
     if (!findJob) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
 
     return findJob;
