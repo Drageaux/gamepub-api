@@ -1,13 +1,14 @@
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { Project } from './project.interface';
 
-export interface Job {
+export interface Job extends Document {
   _id: Types.ObjectId;
   project: Types.ObjectId | Project; // Project._id
   jobNumber?: number;
   title: string;
   body?: string;
   imageUrl?: string;
+  // comments?: JobComment[];
 }
 
 export interface JobComment {
