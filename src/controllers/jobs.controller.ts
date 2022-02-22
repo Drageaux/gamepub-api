@@ -45,7 +45,7 @@ class JobsController {
       const jobs = (
         await findProject.populate({
           path: 'jobs',
-          options: { perDocumentLimit: 10, sort: { createdAt: -1 } }, // latest 10
+          options: { sort: { createdAt: 1 } },
         })
       ).jobs;
 
@@ -55,25 +55,33 @@ class JobsController {
     }
   };
 
+  // /**
+  //  * Receive {projectid} param and find jobs by project.
+  //  * Should send response with jobs.sorted.
+  //  *
+  //  * @param req
+  //  * @param res
+  //  * @param next
+  //  */
+  // public getJobsByProjectId = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const projectId = (req.params.projectid as string).toLocaleLowerCase();
+  //     const findJobsByProject: Job[] = await this.jobs.find({ project: projectId });
+
+  //     res.status(201).json({ data: findJobsByProject, message: 'findByProjectId' });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
+
   /**
-   * Receive {projectid} param and find jobs by project.
-   * Should send response with jobs.sorted
+   * Receive {username} and {projectname} params and a job body and create a new job
+   * with job number (sorted by date created).
    *
    * @param req
    * @param res
    * @param next
    */
-  public getJobsByProjectId = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const projectId = (req.params.projectid as string).toLocaleLowerCase();
-      const findJobsByProject: Job[] = await this.jobs.find({ project: projectId });
-
-      res.status(201).json({ data: findJobsByProject, message: 'findByProjectId' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
   public createJob = async (req: Request, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
@@ -106,6 +114,13 @@ class JobsController {
     }
   };
 
+  /**
+   * Receive {username}, {projectname}, and {jobnumber} params to fetch a single job.
+   *
+   * @param req
+   * @param res
+   * @param next
+   */
   public getJobByJobNumber = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
@@ -118,15 +133,9 @@ class JobsController {
 
   public getJobComments = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const jobNumber = parseInt(req.params.jobnumber as string);
-      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
-      const findJobsByProject: Job[] = await this.jobs.find({ project: findProject._id });
-
-      const job: Job = findJobsByProject[jobNumber - 1];
-      if (!job) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
-
+      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const findCommentsByJob: JobComment[] = await this.jobComments.find({
-        job: job._id,
+        job: findJob._id,
       });
 
       res.status(201).json({ data: findCommentsByJob, message: 'findAll' });
@@ -138,19 +147,14 @@ class JobsController {
   public postJobComment = async (req: Request, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
-      const jobNumber = parseInt(req.params.jobnumber as string);
       const body = req.body.body;
-      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
-      const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(findProject?._id.toString());
-
-      const job: Job = findJobsByProject[jobNumber - 1];
-      if (!job) throw new HttpException(404, `Invalid job number ${jobNumber}`);
-
+      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const createCommentData = await this.jobComments.create({
-        project: findProject._id,
-        job: job._id,
+        project: findJob.project,
+        job: findJob._id,
         body,
       });
+
       res.status(201).json({ data: createCommentData, message: 'created' });
     } catch (error) {
       next(error);
