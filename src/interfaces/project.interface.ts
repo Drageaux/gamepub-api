@@ -1,9 +1,8 @@
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { User } from './users.interface';
-import { Mongoose } from 'mongoose';
 import { Job } from './job.interface';
 
-export interface Project extends Document {
+export interface Project {
   _id: Types.ObjectId;
   creator: Types.ObjectId | User; // User._id
   name: string;
