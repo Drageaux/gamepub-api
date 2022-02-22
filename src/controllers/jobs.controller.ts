@@ -66,7 +66,7 @@ class JobsController {
   public getJobsByProjectId = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const projectId = (req.params.projectid as string).toLocaleLowerCase();
-      const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(projectId);
+      const findJobsByProject: Job[] = await this.jobs.find({ project: projectId });
 
       res.status(201).json({ data: findJobsByProject, message: 'findByProjectId' });
     } catch (error) {
