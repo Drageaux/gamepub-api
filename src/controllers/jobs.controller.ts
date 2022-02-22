@@ -23,7 +23,10 @@ class JobsController {
   public getJobs = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // TODO: limit to 20 jobs by default, then limit to 100 max
-      const findJobs: Job[] = await this.jobs.find().populate('project');
+      const findJobs: Job[] = await this.jobs.find().populate({
+        path: 'project',
+        populate: { path: 'creator' },
+      });
 
       res.status(201).json({ data: findJobs, message: 'findAll' });
     } catch (error) {
