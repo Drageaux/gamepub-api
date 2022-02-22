@@ -6,7 +6,8 @@ const jobSchema: Schema = new Schema(
     project: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
     title: { type: String, required: true },
     body: String,
-    imgUrl: String,
+    imageUrl: String,
+    // comments: [{ type: Schema.Types.ObjectId, ref: 'JobComment', index: true }],
   },
   { timestamps: true },
 );
