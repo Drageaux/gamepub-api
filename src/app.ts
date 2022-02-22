@@ -61,7 +61,7 @@ class App {
     }
 
     // IMPORTANT: If changing IP, need to allow in online Network Access
-    connect(dbConnection.url, dbConnection.options, err => {
+    connect(dbConnection.url, err => {
       if (err) console.error(err);
     });
   }

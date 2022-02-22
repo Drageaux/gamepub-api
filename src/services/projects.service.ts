@@ -1,3 +1,4 @@
+import { HydratedDocument } from 'mongoose';
 import { HttpException } from '@exceptions/HttpException';
 import { Project } from '@interfaces/project.interface';
 import { User } from '@interfaces/users.interface';
@@ -9,7 +10,7 @@ class ProjectsService {
   public users = userModel;
   public projects = projectModel;
 
-  public async getProjectByCreatorAndName(req: Request): Promise<Project> {
+  public async getProjectByCreatorAndName(req: Request): Promise<HydratedDocument<Project>> {
     const username: string = (req.params.username as string).toLocaleLowerCase();
     const projectname: string = (req.params.projectname as string).toLocaleLowerCase();
     const user: User = await this.users.findOne({ username });
@@ -18,7 +19,7 @@ class ProjectsService {
     if (!user?._id) throw new HttpException(404, `User ${username} does not exist`);
 
     // TODO: access check, is this project public or does it belong to the user
-    const findProjectByNameData: Project = await this.projects.findOne({ name: projectname, creator: user._id }).populate('creator');
+    const findProjectByNameData = await this.projects.findOne({ name: projectname, creator: user._id }).populate('creator');
     if (!findProjectByNameData) throw new HttpException(404, `Project ${projectname} by ${username} does not exist`);
     return findProjectByNameData;
   }

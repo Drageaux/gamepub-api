@@ -9,9 +9,9 @@ const projectSchema: Schema = new Schema({
   imageUrl: String,
   tags: [String],
   description: String,
+  jobs: [{ type: Schema.Types.ObjectId, ref: 'Job' }],
 }).index({ creator: 1, name: 1 }, { unique: true });
 
 const projectModel = model<Project & Document>('Project', projectSchema);
-projectModel.createIndexes();
 
 export default projectModel;

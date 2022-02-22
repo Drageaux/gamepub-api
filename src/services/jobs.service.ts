@@ -1,16 +1,23 @@
-import { Job } from '@/interfaces/job.interface';
+import { HydratedDocument } from 'mongoose';
+import { HttpException } from '@/exceptions/HttpException';
+import { Project } from '@/interfaces/project.interface';
 import jobModel from '@/models/jobs.model';
-import { Document } from 'mongoose';
+import projectsService from './projects.service';
 
 class JobsService {
   public jobs = jobModel;
+  private projectsService = new projectsService();
 
-  public async getJobsWithNumbers(projectId: string): Promise<Job[]> {
-    const findJobsByProject: (Job & Document)[] = await this.jobs.find({ project: projectId }).sort({ createdAt: 'asc' });
+  public async getJobByJobNumberWithFullPath(req) {
+    const jobNumber = parseInt(req.params.jobnumber as string);
+    const findProject: HydratedDocument<Project> = await this.projectsService.getProjectByCreatorAndName(req);
 
-    return findJobsByProject.map((x, index) => {
-      return { ...x.toObject(), jobNumber: index + 1 };
-    });
+    const jobsPopulatedProject = await findProject.populate('jobs');
+
+    const findJob = jobsPopulatedProject.jobs.find(x => x.jobNumber === jobNumber);
+    if (!findJob) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
+
+    return findJob;
   }
 }
 

@@ -5,9 +5,4 @@ const { host, port, database, mongodb }: dbConfig = config.get('dbConfig');
 
 export const dbConnection = {
   url: mongodb || `mongodb://${host}:${port}/${database}`,
-  options: {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-  },
 };

@@ -8,6 +8,7 @@ export interface Job {
   title: string;
   body?: string;
   imageUrl?: string;
+  // comments?: JobComment[];
 }
 
 export interface JobComment {
