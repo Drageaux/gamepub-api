@@ -14,6 +14,5 @@ const projectSchema: Schema = new Schema({
 }).index({ creator: 1, name: 1 }, { unique: true });
 
 const projectModel = model<Project & Document>('Project', projectSchema);
-projectModel.createIndexes();
 
 export default projectModel;
