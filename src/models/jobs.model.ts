@@ -3,7 +3,7 @@ import { Job } from '@interfaces/job.interface';
 
 const jobSchema: Schema = new Schema(
   {
-    // project: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
+    project: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
     title: { type: String, required: true },
     body: String,
     imageUrl: String,
@@ -11,10 +11,6 @@ const jobSchema: Schema = new Schema(
   },
   { timestamps: true },
 );
-
-jobSchema.virtual('project').get(function () {
-  return this.parent()._id;
-});
 
 const jobModel = model<Job & Document>('Job', jobSchema);
 
