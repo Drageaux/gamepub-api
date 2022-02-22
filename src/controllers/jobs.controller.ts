@@ -9,6 +9,8 @@ import { Project } from '@interfaces/project.interface';
 import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
 import jobCommentModel from '@/models/job-comments.model';
+import { HydratedDocument, Document } from 'mongoose';
+import { User } from '@/interfaces/users.interface';
 
 class JobsController {
   jobs = jobModel;
@@ -68,17 +70,31 @@ class JobsController {
   public createJob = async (req: Request, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
-      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
+      // const findProject: Project & Document = await this.projectsService.getProjectByCreatorAndName(req);
 
-      const createJobData: Job = await this.jobs.create({
-        project: findProject._id,
-        ...req.body,
-      });
+      const username: string = (req.params.username as string).toLocaleLowerCase();
+      const projectname: string = (req.params.projectname as string).toLocaleLowerCase();
+      const user: User = await this.users.findOne({ username });
+      if (!user?._id) throw new HttpException(404, `User ${username} does not exist`);
 
-      const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(findProject._id.toString());
-      const newJobWithNumber = findJobsByProject.find(x => x._id.toString() == createJobData._id.toString());
+      const newJobData: HydratedDocument<Job> = await this.jobs.create({ ...req.body });
 
-      res.status(201).json({ data: newJobWithNumber, message: 'created' });
+      const updateProject = await this.projects
+        .findOneAndUpdate(
+          { name: projectname, creator: user._id },
+          {
+            $push: {
+              jobs: newJobData._id,
+            },
+          },
+          { new: true },
+        )
+        .populate('jobs')
+        .sort({ createdAt: 1 });
+
+      console.log(updateProject);
+
+      res.status(201).json({ data: newJobData.toObject({ virtuals: true }), message: 'created' });
     } catch (error) {
       next(error);
     }
