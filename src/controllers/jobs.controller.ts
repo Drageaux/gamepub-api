@@ -22,6 +22,7 @@ class JobsController {
 
   public getJobs = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // TODO: limit to 20 jobs by default, then limit to 100 max
       const findJobs: Job[] = await this.jobs.find().populate('project');
 
       res.status(201).json({ data: findJobs, message: 'findAll' });
@@ -39,10 +40,16 @@ class JobsController {
    */
   public getJobsByProjectFullPath = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
-      const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(findProject?._id.toString());
+      // TODO: skip and limit in query
+      const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+      const jobs = (
+        await findProject.populate({
+          path: 'jobs',
+          options: { perDocumentLimit: 10, sort: { createdAt: -1 } }, // latest 10
+        })
+      ).jobs;
 
-      res.status(201).json({ data: findJobsByProject, message: 'findByProject' });
+      res.status(201).json({ data: jobs, message: 'findByProject' });
     } catch (error) {
       next(error);
     }
@@ -70,18 +77,17 @@ class JobsController {
   public createJob = async (req: Request, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
-      // const findProject: Project & Document = await this.projectsService.getProjectByCreatorAndName(req);
-
       const username: string = (req.params.username as string).toLocaleLowerCase();
       const projectname: string = (req.params.projectname as string).toLocaleLowerCase();
       const user: User = await this.users.findOne({ username });
       if (!user?._id) throw new HttpException(404, `User ${username} does not exist`);
 
-      const newJobData: HydratedDocument<Job> = await this.jobs.create({ ...req.body });
+      const findProject = await this.projects.findOne({ name: projectname, creator: user._id });
+
+      const newJobData: HydratedDocument<Job> = await this.jobs.create({ projectId: findProject._id, ...req.body });
 
       const updateProject = await this.projects
         .findOneAndUpdate(
-          { name: projectname, creator: user._id },
           {
             $push: {
               jobs: newJobData._id,
@@ -103,10 +109,8 @@ class JobsController {
   public getJobByJobNumber = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const jobNumber = parseInt(req.params.jobnumber as string);
-      const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
-      const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(findProject?._id.toString());
-
-      const job: Job = findJobsByProject[jobNumber - 1];
+      const findProject: HydratedDocument<Project> = await this.projectsService.getProjectByCreatorAndName(req);
+      const job = findProject.jobs[jobNumber - 1];
       if (!job) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
 
       res.status(201).json({ data: job, message: 'findone' });
