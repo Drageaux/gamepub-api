@@ -96,6 +96,8 @@ class JobsController {
         .sort({ createdAt: 1 }); // sort to add number
 
       const jobNumber = updateProject.jobs.findIndex(x => x._id.toString() == newJobData._id.toString()) + 1;
+      if (jobNumber == 0) throw new HttpException(404, `Error creating job`);
+
       const newJobWithJobNumberData = await this.jobs.findByIdAndUpdate(newJobData._id, { jobNumber }, { new: true });
 
       res.status(201).json({ data: newJobWithJobNumberData, message: 'created' });
@@ -106,12 +108,9 @@ class JobsController {
 
   public getJobByJobNumber = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const jobNumber = parseInt(req.params.jobnumber as string);
-      const findProject: HydratedDocument<Project> = await this.projectsService.getProjectByCreatorAndName(req);
-      const job = findProject.jobs[jobNumber - 1];
-      if (!job) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
+      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
 
-      res.status(201).json({ data: job, message: 'findone' });
+      res.status(201).json({ data: findJob, message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -121,7 +120,7 @@ class JobsController {
     try {
       const jobNumber = parseInt(req.params.jobnumber as string);
       const findProject: Project = await this.projectsService.getProjectByCreatorAndName(req);
-      const findJobsByProject: Job[] = await this.jobsService.getJobsWithNumbers(findProject?._id.toString());
+      const findJobsByProject: Job[] = await this.jobs.find({ project: findProject._id });
 
       const job: Job = findJobsByProject[jobNumber - 1];
       if (!job) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
