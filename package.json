@@ -1,18 +1,17 @@
 {
-  "name": "game-pub-server",
+  "name": "gamepub-api",
   "version": "0.0.0",
   "description": "TypeScript + Mongoose + MongoDB + Express API Server",
-  "author": "",
+  "author": "David Thong Nguyen",
   "license": "ISC",
   "scripts": {
-    "start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
-    "dev": "cross-env NODE_ENV=development nodemon",
+    "start": "npm run build && cross-env node dist/server.js",
+    "dev": "cross-env nodemon",
     "build": "tsc && npx tsc-alias",
     "test": "jest --forceExit --detectOpenHandles",
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",
     "lint:fix": "npm run lint -- --fix",
-    "deploy:prod": "npm run build && pm2 start ecosystem.config.js --only prod",
-    "deploy:dev": "pm2 start ecosystem.config.js --only dev"
+    "deploy:heroku": "git add . && git commit -m Heroku && git push heroku master"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",

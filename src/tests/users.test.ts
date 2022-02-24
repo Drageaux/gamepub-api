@@ -61,6 +61,7 @@ describe('Testing Users', () => {
   describe('[POST] /users', () => {
     it('response Create User', async () => {
       const userData: CreateUserDto = {
+        username: 'test',
         email: 'test@email.com',
         password: 'q1w2e3r4',
       };
@@ -85,6 +86,7 @@ describe('Testing Users', () => {
     it('response Update User', async () => {
       const userId = '60706478aad6c9ad19a31c84';
       const userData: CreateUserDto = {
+        username: 'test',
         email: 'test@email.com',
         password: 'q1w2e3r4',
       };
@@ -95,6 +97,7 @@ describe('Testing Users', () => {
       if (userData.email) {
         users.findOne = jest.fn().mockReturnValue({
           _id: userId,
+          username: userData.username,
           email: userData.email,
           password: await bcrypt.hash(userData.password, 10),
         });
