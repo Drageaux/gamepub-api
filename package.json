@@ -1,5 +1,5 @@
 {
-  "name": "game-pub-server",
+  "name": "gamepub-api",
   "version": "0.0.0",
   "description": "TypeScript + Mongoose + MongoDB + Express API Server",
   "author": "David Thong Nguyen",
