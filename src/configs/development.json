@@ -1,16 +1,11 @@
 {
     "env": "development",
-    "dbConfig": {
-        "host": "localhost",
-        "database": "game-pub",
-        "port": 27017
-    },
     "log": {
         "format": "dev",
         "dir": "../logs"
     },
     "cors": {
-        "origin": true,
+        "origin": "https://gamepub-staging.herokuapp.com",
         "credentials": true
     }
 }
