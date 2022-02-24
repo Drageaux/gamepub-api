@@ -33,11 +33,7 @@ class App {
 
     this.connectToDatabase();
     this.configureCloudinary();
-    // TODO: File size limit isn't working
-    // Init routes first to declare endpoint-specific middleware (file size limit)
-    // NOT sure of the consequences, but for now it works
-    this.initializeMiddlewares();
-    this.initializeRoutes(routes);
+    this.initializeMiddlewares(routes);
     this.initializeSwagger();
     this.initializeErrorHandling();
   }
@@ -76,14 +72,17 @@ class App {
     });
   }
 
-  private initializeMiddlewares() {
+  private initializeMiddlewares(routes: Routes[]) {
     this.app.use(morgan(config.get('log.format'), { stream }));
     this.app.use(cors({ origin: config.get('cors.origin'), credentials: config.get('cors.credentials') }));
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: true }));
+    // Init routes first to declare endpoint-specific middleware (file size limit)
+    // NOT sure of the consequences, but for now it works
+    this.initializeRoutes(routes);
+    this.app.use(express.json({ limit: '2mb' })); // usually raw texts shouldn't be >5mb
+    this.app.use(express.urlencoded({ limit: '60mb', extended: true })); // handle possible large images
     this.app.use(cookieParser());
   }
 
