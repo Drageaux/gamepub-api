@@ -5,12 +5,10 @@ import projectModel from '@models/projects.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@exceptions/HttpException';
 import { Job, JobComment } from '@interfaces/job.interface';
-import { Project } from '@interfaces/project.interface';
 import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
 import jobCommentModel from '@/models/job-comments.model';
 import { HydratedDocument, Document } from 'mongoose';
-import { User } from '@/interfaces/users.interface';
 
 class JobsController {
   jobs = jobModel;

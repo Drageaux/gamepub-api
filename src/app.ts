@@ -33,7 +33,8 @@ class App {
 
     this.connectToDatabase();
     this.configureCloudinary();
-    this.initializeMiddlewares(routes);
+    this.initializeMiddlewares();
+    this.initializeRoutes(routes);
     this.initializeSwagger();
     this.initializeErrorHandling();
   }
@@ -72,16 +73,13 @@ class App {
     });
   }
 
-  private initializeMiddlewares(routes: Routes[]) {
+  private initializeMiddlewares() {
     this.app.use(morgan(config.get('log.format'), { stream }));
     this.app.use(cors({ origin: config.get('cors.origin'), credentials: config.get('cors.credentials') }));
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
-    // Init routes first to declare endpoint-specific middleware (file size limit)
-    // NOT sure of the consequences, but for now it works
-    this.initializeRoutes(routes);
-    this.app.use(express.json({ limit: '2mb' })); // usually raw texts shouldn't be >5mb
+    this.app.use(express.json({ limit: '4mb' })); // usually raw texts shouldn't be >5mb
     this.app.use(express.urlencoded({ limit: '60mb', extended: true })); // handle possible large images
     this.app.use(cookieParser());
   }
