@@ -7,5 +7,11 @@
     "key": "CLOUDINARY_KEY",
     "secret": "CLOUDINARY_SECRET",
     "url": "CLOUDINARY_URL"
+  },
+  "auth0": {
+    "baseUrl": "AUTH0_DOMAIN",
+    "audience": "AUTH0_AUDIENCE",
+    "secretKey": "AUTH0_SECRET"
   }
+
 }

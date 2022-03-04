@@ -26,6 +26,7 @@
     "dotenv": "^10.0.0",
     "envalid": "^7.1.0",
     "express": "^4.17.1",
+    "express-oauth2-jwt-bearer": "^1.1.0",
     "helmet": "^4.6.0",
     "hpp": "^0.2.3",
     "jest": "^27.0.6",
