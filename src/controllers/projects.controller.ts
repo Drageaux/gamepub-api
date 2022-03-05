@@ -75,8 +75,10 @@ class ProjectsController {
     try {
       const username: string = req.params.username;
 
-      const { _id } = await this.users.findOne({ username });
-      console.log(_id);
+      const findUser = await this.users.findOne({ username });
+      if (!findUser) throw new HttpException(400, `Cannot find user "${username}"`);
+
+      const _id = findUser._id;
       const findProjectsByUsername: Project[] = await this.projects.find({ creator: _id });
       // TODO: access check, is this project public or does it belong to the user
 
