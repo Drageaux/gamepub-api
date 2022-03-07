@@ -11,5 +11,14 @@ export interface TokenData {
 }
 
 export interface RequestWithUser extends Request {
-  user: User;
+  user: {
+    iss: string;
+    sub: string;
+    aud: string[];
+    iat: number;
+    exp: number;
+    azp: string;
+    scope: string;
+  };
+  isUser?: boolean;
 }
