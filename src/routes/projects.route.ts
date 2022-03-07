@@ -3,7 +3,7 @@ import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import ProjectsController from '@/controllers/projects.controller';
 import { CreateProjectDto } from '@/dtos/projects.dto';
-import { compareUser, requireUser, softCheckUser } from '@/middlewares/auth.middleware';
+import { injectUsername, requireUser, softCheckUser } from '@/middlewares/auth.middleware';
 
 class ProjectsRoute implements Routes {
   public path = '/projects';
@@ -15,14 +15,24 @@ class ProjectsRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get(`${this.path}`, softCheckUser, this.projectsController.getProjects);
-    this.router.get(`/users/:username${this.path}`, softCheckUser, compareUser, this.projectsController.getProjectsByUsername);
-    this.router.get(`/users/:username${this.path}/:projectname`, softCheckUser, this.projectsController.getProjectByFullPath);
-    this.router.get(`${this.path}/:id`, softCheckUser, this.projectsController.getProjectById);
+    // PUBLIC
+    this.router.get(`${this.path}`, this.projectsController.getProjects);
 
-    this.router.put(`${this.path}/:id/image`, requireUser, this.projectsController.updateProjectImage);
-    this.router.post(`${this.path}/check-name`, requireUser, this.projectsController.checkName);
-    this.router.post(`${this.path}`, requireUser, validationMiddleware(CreateProjectDto, 'body'), this.projectsController.createProject);
+    // PUBLIC OR ALLOW PRIVATE IF IS SAME USER
+    this.router.get(`/users/:username${this.path}`, softCheckUser, injectUsername, this.projectsController.getProjectsByUsername);
+    this.router.get(`/users/:username${this.path}/:projectname`, softCheckUser, injectUsername, this.projectsController.getProjectByFullPath);
+    this.router.get(`${this.path}/:id`, softCheckUser, injectUsername, this.projectsController.getProjectById);
+
+    // ONLY ALLOW IF USER
+    this.router.put(`${this.path}/:id/image`, requireUser, injectUsername, this.projectsController.updateProjectImage);
+    this.router.post(`${this.path}/check-name`, requireUser, injectUsername, this.projectsController.checkName);
+    this.router.post(
+      `${this.path}`,
+      requireUser,
+      injectUsername,
+      validationMiddleware(CreateProjectDto, 'body'),
+      this.projectsController.createProject,
+    );
   }
 }
 
