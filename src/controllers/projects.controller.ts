@@ -36,23 +36,46 @@ class ProjectsController {
     }
   };
 
-  public getProjectById = async (req: Request, res: Response, next: NextFunction) => {
+  public getProjectByFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
-      const projectId: string = req.params.id;
-      const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId }).populate('creator');
-      // TODO: access check, is this project public or does it belong to the user
+      const findProjectByNameData: Project = await this.projectsService.getProjectByCreatorAndName(req);
 
-      res.status(200).json({ data: findProjectByIdData, message: 'findOne' });
+      res.status(200).json({ data: findProjectByNameData, message: 'findOne' });
     } catch (error) {
       next(error);
     }
   };
 
-  getProjectByFullPath = async (req: Request, res: Response, next: NextFunction) => {
+  public getProjectsByUsername = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
-      const findProjectByNameData: Project = await this.projectsService.getProjectByCreatorAndName(req);
+      const username: string = req.params.username;
+      const isUser = username === req.username;
 
-      res.status(200).json({ data: findProjectByNameData, message: 'findOne' });
+      // TODO: access check, is this project public or does it belong to the user
+      const findProjectsByUsername: Project[] = await (
+        await this.projects.find({ creator: username })
+      ).filter(proj => {
+        return !proj.private || (proj.private && isUser);
+      });
+
+      res.status(200).json({ data: findProjectsByUsername, message: 'findProjectsByUsername' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getProjectById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const projectId: string = req.params.id;
+
+      // TODO: access check, is this project public or does it belong to the user
+      const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId });
+      const isUser = findProjectByIdData.creator === req.username;
+      if (findProjectByIdData.private && !isUser) {
+        throw new HttpException(401, `You do not have access to this project`);
+      }
+
+      res.status(200).json({ data: findProjectByIdData, message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -72,23 +95,10 @@ class ProjectsController {
     }
   };
 
-  public getProjectsByUsername = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    try {
-      const username: string = req.params.username;
-
-      const findProjectsByUsername: Project[] = await this.projects.find({ creator: username });
-      // TODO: access check, is this project public or does it belong to the user
-
-      res.status(200).json({ data: findProjectsByUsername, message: 'findProjectsByUsername' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
   public checkName = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const name = req.body.name;
-      const creator = req.body.creator;
+      const creator = req.username;
 
       const checkIfNameExists: Project = await this.projects.findOne({ creator, name });
 
