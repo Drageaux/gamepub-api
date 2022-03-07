@@ -51,7 +51,7 @@ class ProjectsController {
       const username: string = req.params.username;
       const isUser = username === req.username;
 
-      // TODO: access check, is this project public or does it belong to the user
+      // access check, are these projects public or do they belong to the user?
       const findProjectsByUsername: Project[] = await (
         await this.projects.find({ creator: username })
       ).filter(proj => {
@@ -68,28 +68,15 @@ class ProjectsController {
     try {
       const projectId: string = req.params.id;
 
-      // TODO: access check, is this project public or does it belong to the user
       const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId });
       const isUser = findProjectByIdData.creator === req.username;
+
+      // access check, is this project public or does it belong to the user?
       if (findProjectByIdData.private && !isUser) {
         throw new HttpException(401, `You do not have access to this project`);
       }
 
       res.status(200).json({ data: findProjectByIdData, message: 'findOne' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public createProject = async (req: Request, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
-    try {
-      const createProjectData: Project = await this.projects.create({
-        ...req.body,
-      });
-      const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id).populate({ path: 'creator', select: 'username' });
-
-      res.status(201).json({ data: findPopulatedProjectData, message: 'created' });
     } catch (error) {
       next(error);
     }
@@ -107,6 +94,22 @@ class ProjectsController {
       } else {
         res.status(200).json({ message: 'nameIsAvailable' });
       }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public createProject = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
+    try {
+      const username = req.username;
+      const createProjectData: Project = await this.projects.create({
+        creator: username,
+        ...req.body,
+      });
+      const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id);
+
+      res.status(201).json({ data: findPopulatedProjectData, message: 'created' });
     } catch (error) {
       next(error);
     }
