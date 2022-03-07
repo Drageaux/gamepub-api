@@ -10,6 +10,7 @@ const projectSchema: Schema = new Schema({
   tags: [String],
   description: String,
   jobs: [{ type: Schema.Types.ObjectId, ref: 'Job' }],
+  private: Boolean,
 }).index({ creator: 1, name: 1 }, { unique: true });
 
 const projectModel = model<Project & Document>('Project', projectSchema);

@@ -10,4 +10,5 @@ export interface Project {
   githubRepo?: string;
   imageUrl?: string;
   jobs?: Types.DocumentArray<Job>;
+  private?: boolean;
 }

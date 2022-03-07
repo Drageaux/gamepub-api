@@ -45,15 +45,14 @@ export const requireUser = jwt({
 });
 
 /**
- * Use user's access token to pull userinfo, then compare with params' username.
- * If userinfo's username equals params' username, set req.isUser to true.
+ * Use user's access token to pull userinfo, then inject username.
  *
  * @param req
  * @param res
  * @param next
  * @returns
  */
-export const compareUser = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+export const injectUsername = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   if (!req.user) next();
   else {
     const Authorization = req.cookies['Authorization'] || req.header('Authorization').split('Bearer ')[1] || null;
@@ -65,8 +64,8 @@ export const compareUser = async (req: RequestWithUser, res: Response, next: Nex
 
     try {
       if (Authorization && url) {
-        const userinfo = await getUserInfo(url, headers);
-        if (req.params?.username === userinfo.username) req.isUser = true;
+        const { username } = await getUserInfo(url, headers);
+        req.username = username;
       }
       next();
     } catch (err) {

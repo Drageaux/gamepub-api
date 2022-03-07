@@ -20,5 +20,6 @@ export interface RequestWithUser extends Request {
     azp: string;
     scope: string;
   };
+  username?: string;
   isUser?: boolean;
 }
