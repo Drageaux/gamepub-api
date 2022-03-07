@@ -1,79 +1,86 @@
 import config from 'config';
 import { NextFunction, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
-import userModel from '@models/users.model';
+import { RequestWithUser } from '@interfaces/auth.interface';
 import { Auth0Config } from '@/interfaces/auth0-config.interface';
-import { auth } from 'express-oauth2-jwt-bearer';
+import axios from 'axios';
 
-const { baseUrl, audience, secretKey }: Auth0Config = config.get('auth0');
-if (!secretKey) console.error('‼️ FATAL ERROR: Auth0 has no secret key');
+import jwt from 'express-jwt';
+import jwks from 'jwks-rsa';
+
+const { issuerBaseUrl, audience }: Auth0Config = config.get('auth0');
+// if (!secretKey) console.error('‼️ FATAL ERROR: Auth0 has no secret key');
 
 /**
  * Authorization middleware. When used, the Access Token must
  * exist and be verified against the Auth0 JSON Web Key Set.
  */
-export const checkJwt = auth({
+const jwtOptions = {
+  secret: jwks.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `${issuerBaseUrl}.well-known/jwks.json`,
+  }),
   audience,
-  issuerBaseURL: baseUrl,
-});
+  issuer: issuerBaseUrl,
+  algorithms: ['RS256'],
+};
 
 /**
- * Authorization middleware. Inject user into request if token's user exists.
+ * Authorization middleware. Inject user into request if bare minimum user info exists.
  * Example use case: list all public projects, but for this user, list both private & public projects.
  *
  * @param req
  * @param res
  * @param next
  */
-export const softCheckUser = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-  try {
+export const softCheckUser = jwt({
+  credentialsRequired: false,
+  ...jwtOptions,
+});
+
+export const requireUser = jwt({
+  credentialsRequired: true,
+  ...jwtOptions,
+});
+
+/**
+ * Use user's access token to pull userinfo, then compare with params' username.
+ * If userinfo's username equals params' username, set req.isUser to true.
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @returns
+ */
+export const compareUser = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  if (!req.user) next();
+  else {
     const Authorization = req.cookies['Authorization'] || req.header('Authorization').split('Bearer ')[1] || null;
+    const url = encodeURI(`${audience}users/${req.user.sub}`); // get full info
+    const headers = {
+      Authorization: 'Bearer ' + Authorization,
+      'Content-Type': 'application/json',
+    };
 
-    if (Authorization) {
-      const verificationResponse = (await jwt.verify(Authorization, secretKey)) as DataStoredInToken;
-      const userId = verificationResponse._id;
-      const findUser = await userModel.findById(userId);
-
-      if (findUser) {
-        req.user = findUser;
-        next();
-      } else {
-        // new HttpException(401, 'Wrong authentication token')
-        next();
+    try {
+      if (Authorization && url) {
+        const userinfo = await getUserInfo(url, headers);
+        if (req.params?.username === userinfo.username) req.isUser = true;
       }
-    } else {
-      // new HttpException(404, 'Authentication token missing')
       next();
+    } catch (err) {
+      next(err);
     }
-  } catch (error) {
-    // new HttpException(404, 'Authentication token missing')
-    next();
   }
 };
 
-const requireUser = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-  try {
-    const Authorization = req.cookies['Authorization'] || req.header('Authorization').split('Bearer ')[1] || null;
-
-    if (Authorization) {
-      const verificationResponse = (await jwt.verify(Authorization, secretKey)) as DataStoredInToken;
-      const userId = verificationResponse._id;
-      const findUser = await userModel.findById(userId);
-
-      if (findUser) {
-        req.user = findUser;
-        next();
-      } else {
-        next(new HttpException(401, 'Wrong authentication token'));
-      }
-    } else {
-      next(new HttpException(404, 'Authentication token missing'));
-    }
-  } catch (error) {
-    next(new HttpException(401, 'Wrong authentication token'));
-  }
+const getUserInfo = async (authApiUrl, headers) => {
+  const { data } = await axios({
+    url: authApiUrl,
+    method: 'GET',
+    responseType: 'json',
+    headers,
+  });
+  return data;
 };
-
-export default requireUser;
