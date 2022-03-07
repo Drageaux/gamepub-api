@@ -3,7 +3,7 @@ import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import ProjectsController from '@/controllers/projects.controller';
 import { CreateProjectDto } from '@/dtos/projects.dto';
-import requireUser, { softCheckUser } from '@/middlewares/auth.middleware';
+import { compareUser, requireUser, softCheckUser } from '@/middlewares/auth.middleware';
 
 class ProjectsRoute implements Routes {
   public path = '/projects';
@@ -16,7 +16,7 @@ class ProjectsRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}`, softCheckUser, this.projectsController.getProjects);
-    this.router.get(`/users/:username${this.path}`, softCheckUser, this.projectsController.getProjectsByUsername);
+    this.router.get(`/users/:username${this.path}`, softCheckUser, compareUser, this.projectsController.getProjectsByUsername);
     this.router.get(`/users/:username${this.path}/:projectname`, softCheckUser, this.projectsController.getProjectByFullPath);
     this.router.get(`${this.path}/:id`, softCheckUser, this.projectsController.getProjectById);
 

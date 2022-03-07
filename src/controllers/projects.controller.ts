@@ -7,6 +7,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import projectsService from '@services/projects.service';
 import cloudinaryService from '@services/cloudinary.service';
 import { UploadApiResponse, ResourceOptions } from 'cloudinary';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 const MAX_PER_PAGE = 100;
 const DEFAULT_PER_PAGE = 20;
@@ -71,15 +72,11 @@ class ProjectsController {
     }
   };
 
-  public getProjectsByUsername = async (req: Request, res: Response, next: NextFunction) => {
+  public getProjectsByUsername = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const username: string = req.params.username;
 
-      const findUser = await this.users.findOne({ username });
-      if (!findUser) throw new HttpException(400, `Cannot find user "${username}"`);
-
-      const _id = findUser._id;
-      const findProjectsByUsername: Project[] = await this.projects.find({ creator: _id });
+      const findProjectsByUsername: Project[] = await this.projects.find({ creator: username });
       // TODO: access check, is this project public or does it belong to the user
 
       res.status(200).json({ data: findProjectsByUsername, message: 'findProjectsByUsername' });
@@ -88,7 +85,7 @@ class ProjectsController {
     }
   };
 
-  public checkName = async (req: Request, res: Response, next: NextFunction) => {
+  public checkName = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const name = req.body.name;
       const creator = req.body.creator;

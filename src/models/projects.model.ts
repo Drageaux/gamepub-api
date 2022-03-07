@@ -2,7 +2,7 @@ import { model, Schema, Document } from 'mongoose';
 import { Project } from '@/interfaces/project.interface';
 
 const projectSchema: Schema = new Schema({
-  creator: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  creator: { type: String, required: true },
   githubRepo: String,
   name: { type: String, required: true, min: 3, max: 100 },
   displayName: { type: String, min: 3, max: 100 },
