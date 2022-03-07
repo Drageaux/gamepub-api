@@ -9,7 +9,8 @@
     "url": "CLOUDINARY_URL"
   },
   "auth0": {
-    "baseUrl": "AUTH0_DOMAIN",
+    "baseUrl": "BASE_URL",
+    "issuerBaseUrl": "AUTH0_DOMAIN",
     "audience": "AUTH0_AUDIENCE",
     "secretKey": "AUTH0_CLIENT_SECRET"
   }
