@@ -24,7 +24,6 @@ class ProjectsRoute implements Routes {
     this.router.get(`${this.path}/:id`, softCheckUser, injectUsername, this.projectsController.getProjectById);
 
     // ONLY ALLOW IF USER
-    this.router.put(`${this.path}/:id/image`, requireUser, injectUsername, this.projectsController.updateProjectImage);
     this.router.post(`${this.path}/check-name`, requireUser, injectUsername, this.projectsController.checkName);
     this.router.post(
       `${this.path}`,
@@ -33,6 +32,7 @@ class ProjectsRoute implements Routes {
       validationMiddleware(CreateProjectDto, 'body'),
       this.projectsController.createProject,
     );
+    this.router.put(`${this.path}/:id/image`, requireUser, injectUsername, this.projectsController.updateProjectImage);
   }
 }
 

@@ -5,9 +5,6 @@ export class CreateProjectDto {
   @IsString()
   public name: string;
 
-  @IsString()
-  public creator: string;
-
   @ValidateIf((obj, val) => val != null && val != '')
   @Length(3, 100)
   @IsString()
