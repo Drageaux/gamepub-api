@@ -13,15 +13,10 @@ const auth0 = new ManagementClient({
 
 class UserService {
   public findUserByUsername = async (username: string): Promise<User> => {
-    try {
-      const users = await auth0.getUsers({ q: 'username=' + username });
-      if (users.length === 0) throw new HttpException(404, `User ${username} not found.`);
+    const users = await auth0.getUsers({ q: 'username=' + username });
+    if (users.length === 0) throw new HttpException(404, `User ${username} not found.`);
 
-      return users[0];
-    } catch (err) {
-      console.error(err);
-      return null;
-    }
+    return users[0];
   };
 }
 export default UserService;
