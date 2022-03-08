@@ -12,7 +12,8 @@
     "baseUrl": "BASE_URL",
     "issuerBaseUrl": "AUTH0_DOMAIN",
     "audience": "AUTH0_AUDIENCE",
-    "secretKey": "AUTH0_CLIENT_SECRET"
+    "clientId": "AUTH0_M2M_ID",
+    "clientSecret": "AUTH0_M2M_SECRET"
   }
 
 }

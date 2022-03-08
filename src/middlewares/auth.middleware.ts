@@ -19,10 +19,10 @@ const jwtOptions = {
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `${issuerBaseUrl}.well-known/jwks.json`,
+    jwksUri: `https://${issuerBaseUrl}/.well-known/jwks.json`,
   }),
   audience,
-  issuer: issuerBaseUrl,
+  issuer: `https://${issuerBaseUrl}`,
   algorithms: ['RS256'],
 };
 
