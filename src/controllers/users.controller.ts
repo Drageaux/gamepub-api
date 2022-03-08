@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { CreateUserDto } from '@dtos/users.dto';
 import userService from '@services/users.service';
-import { findUserWithUsername } from '@/middlewares/auth.middleware';
 import { User } from 'auth0';
 
 class UsersController {

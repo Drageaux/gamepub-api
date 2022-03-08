@@ -22,7 +22,7 @@ const jwtOptions = {
     jwksUri: `https://${issuerBaseUrl}/.well-known/jwks.json`,
   }),
   audience,
-  issuer: `https://${issuerBaseUrl}`,
+  issuer: `https://${issuerBaseUrl}/`,
   algorithms: ['RS256'],
 };
 
