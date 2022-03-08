@@ -1,6 +1,6 @@
 import config from 'config';
 import { Auth0Config } from '@/interfaces/auth0-config.interface';
-import { ManagementClient } from 'auth0';
+import { ManagementClient, User } from 'auth0';
 import { HttpException } from '@/exceptions/HttpException';
 
 const { issuerBaseUrl, clientId, clientSecret }: Auth0Config = config.get('auth0');
@@ -12,7 +12,7 @@ const auth0 = new ManagementClient({
 });
 
 class UserService {
-  public findUserByUsername = async (username: string) => {
+  public findUserByUsername = async (username: string): Promise<User> => {
     try {
       const users = await auth0.getUsers({ q: 'username=' + username });
       if (users.length === 0) throw new HttpException(404, `User ${username} not found.`);

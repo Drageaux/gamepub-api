@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { CreateUserDto } from '@dtos/users.dto';
-import { User } from '@interfaces/users.interface';
 import userService from '@services/users.service';
 import { findUserWithUsername } from '@/middlewares/auth.middleware';
+import { User } from 'auth0';
 
 class UsersController {
   public userService = new userService();
@@ -31,9 +31,9 @@ class UsersController {
   public getUserByUsername = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const username: string = req.params.username;
-      const user = await this.userService.findUserByUsername(username);
+      const user: User = await this.userService.findUserByUsername(username);
 
-      res.status(200).json({ data: user, message: 'findOne' });
+      res.status(200).json({ data: { username: user.username }, message: 'findOne' });
     } catch (error) {
       next(error);
     }
