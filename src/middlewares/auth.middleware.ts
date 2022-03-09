@@ -6,6 +6,8 @@ import { Auth0Config } from '@/interfaces/auth0-config.interface';
 import jwt from 'express-jwt';
 import jwks from 'jwks-rsa';
 import UserService from '@/services/users.service';
+import { HttpException } from '@/exceptions/HttpException';
+import { Role } from 'auth0';
 
 const { issuerBaseUrl, audience }: Auth0Config = config.get('auth0');
 
@@ -46,7 +48,8 @@ export const requireUser = jwt({
 const usersService = new UserService();
 
 /**
- * Use user's access token to pull userinfo, then inject username.
+ * Pull userinfo, then inject username.
+ * ALWAYS call after jwt has injected data into req.user.
  *
  * @param req
  * @param res
@@ -62,7 +65,23 @@ export const injectUsername = async (req: RequestWithUser, res: Response, next: 
       req.username = username;
       next();
     } catch (err) {
-      next(err);
+      console.error(err);
+      next();
     }
+  }
+};
+
+export const requireAdmin = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) throw new HttpException(401, "You're not admin");
+
+    const roles: Role[] = await usersService.getUserRoles(req.user.sub);
+    if (roles?.length === 0 || !roles.find(x => x.name === 'Site Admin')) {
+      throw new HttpException(401, "You're not admin");
+    } else {
+      next();
+    }
+  } catch (err) {
+    next(err);
   }
 };
