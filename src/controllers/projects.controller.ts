@@ -148,11 +148,11 @@ class ProjectsController {
       const { creator, name } = req.body;
       if (name == null) throw new HttpException(400, 'Missing project name');
       const username = creator ? req.username : null;
-
       if (username == null) throw new HttpException(400, 'Missing creator name');
-      const findOneProject: Project = await this.projects.findOne({ username, name });
 
+      const findOneProject: Project = await this.projects.findOne({ creator: username, name });
       if (findOneProject) throw new HttpException(409, 'Project already exists');
+
       const createProjectData: Project = await this.projects.create({
         ...req.body,
       });
