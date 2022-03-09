@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import ProjectsController from '@/controllers/projects.controller';
-import { CreateProjectDto } from '@/dtos/projects.dto';
+import { AdminCreateProjectDto, CreateProjectDto } from '@/dtos/projects.dto';
 import { injectUsername, requireUser, softCheckUser } from '@/middlewares/auth.middleware';
 
 class ProjectsRoute implements Routes {

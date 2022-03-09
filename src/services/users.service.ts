@@ -11,7 +11,7 @@ const auth0 = new ManagementClient({
   clientSecret,
   scope: 'read:users update:users read:roles read:role_members',
 });
-auth0.getAccessToken().then(console.log).catch(console.error);
+// auth0.getAccessToken().then(console.log).catch(console.error);
 
 class UserService {
   public findUserByUsername = async (username: string): Promise<User> => {
