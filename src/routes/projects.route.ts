@@ -1,3 +1,4 @@
+import { requireAdmin } from './../middlewares/auth.middleware';
 import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
@@ -33,6 +34,16 @@ class ProjectsRoute implements Routes {
       this.projectsController.createProject,
     );
     this.router.put(`${this.path}/:id/image`, requireUser, injectUsername, this.projectsController.updateProjectImage);
+
+    // ADMIN ONLY
+    this.router.post(
+      `/admin${this.path}`,
+      requireUser,
+      injectUsername,
+      requireAdmin,
+      validationMiddleware(AdminCreateProjectDto, 'body'),
+      this.projectsController.adminCreateProject,
+    );
   }
 }
 

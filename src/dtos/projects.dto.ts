@@ -27,3 +27,9 @@ export class CreateProjectDto {
   @IsOptional()
   public imageUrl: string;
 }
+
+export class AdminCreateProjectDto extends CreateProjectDto {
+  @IsString()
+  @IsOptional()
+  creator: string;
+}
