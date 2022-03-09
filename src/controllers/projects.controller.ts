@@ -103,6 +103,10 @@ class ProjectsController {
     if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
     try {
       const username = req.username;
+      const { name } = req.body;
+      const findOneProject: Project = await this.projects.findOne({ creator: username, name });
+      if (findOneProject) throw new HttpException(409, 'Project already exists');
+
       const createProjectData: Project = await this.projects.create({
         creator: username,
         ...req.body,
@@ -130,6 +134,30 @@ class ProjectsController {
 
       const updateProjectById: Project = await this.projects.findByIdAndUpdate(projId, { imageUrl: uploadImageData.secure_url }, { new: true });
       res.status(200).json({ data: updateProjectById, message: 'updateProjectImage' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /*************************************************************************/
+  /********************************* ADMIN *********************************/
+  /*************************************************************************/
+  public adminCreateProject = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
+    try {
+      const { creator, name } = req.body;
+      if (name == null) throw new HttpException(400, 'Missing project name');
+      const username = creator ? req.username : null;
+
+      if (username == null) throw new HttpException(400, 'Missing creator name');
+      const findOneProject: Project = await this.projects.findOne({ username, name });
+
+      if (findOneProject) throw new HttpException(409, 'Project already exists');
+      const createProjectData: Project = await this.projects.create({
+        ...req.body,
+      });
+
+      res.status(201).json({ data: createProjectData, message: 'created' });
     } catch (error) {
       next(error);
     }
