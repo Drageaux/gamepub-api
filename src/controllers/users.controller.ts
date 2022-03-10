@@ -52,6 +52,7 @@ class UsersController {
     }
   };
 
+  // TODO: If update username, send warnings and create redirects to new project path with new username
   // public updateUser = async (req: Request, res: Response, next: NextFunction) => {
   //   try {
   //     const userId: string = req.params.id;
