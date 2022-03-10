@@ -50,12 +50,11 @@ class ProjectsController {
     try {
       const username: string = req.params.username;
       const isUser = username === req.username;
-
-      // access check, are these projects public or do they belong to the user?
-      const findProjectsByUsername: Project[] = await (
-        await this.projects.find({ creator: username })
-      ).filter(proj => {
-        return !proj.private || (proj.private && isUser);
+      // access check; if is user then include private
+      // helpful to keep options in the find() call so that skip() and limit() may follow
+      const findProjectsByUsername: Project[] = await this.projects.find({
+        creator: username,
+        private: this.projectsService.getPrivateQueryOptions(isUser),
       });
 
       res.status(200).json({ data: findProjectsByUsername, message: 'findProjectsByUsername' });

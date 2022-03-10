@@ -27,6 +27,10 @@ class ProjectsService {
 
     return findProjectByNameData;
   }
+
+  public getPrivateQueryOptions = (isUser: boolean) => {
+    return isUser ? { $in: [true, false, undefined, null] } : { $ne: true };
+  };
   // public generateUniformProjectName(projectName: string) {
   //   const result = projectName
   //     .trim()
