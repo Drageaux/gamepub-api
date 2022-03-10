@@ -99,12 +99,12 @@ class ProjectsController {
   };
 
   public createProject = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
+    if (isEmpty(req.body)) throw new HttpException(400, 'Bad request.');
     try {
       const username = req.username;
       const { name } = req.body;
       const findOneProject: Project = await this.projects.findOne({ creator: username, name });
-      if (findOneProject) throw new HttpException(409, 'Project already exists');
+      if (findOneProject) throw new HttpException(409, 'Project already exists.');
 
       const createProjectData: Project = await this.projects.create({
         creator: username,
@@ -142,7 +142,7 @@ class ProjectsController {
   /********************************* ADMIN *********************************/
   /*************************************************************************/
   public adminCreateProject = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
+    if (isEmpty(req.body)) throw new HttpException(400, 'Bad request.');
     try {
       const { creator, name } = req.body;
       if (name == null) throw new HttpException(400, 'Missing project name');
