@@ -118,11 +118,16 @@ class ProjectsController {
     }
   };
 
-  public updateProjectImage = async (req: Request, res: Response, next: NextFunction) => {
+  public updateProjectImage = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
+      if (!req.username) throw new HttpException(401, 'Unauthorized.');
+
       const projId = req.params.id;
       const findProjectData: Project = await this.projects.findById(projId);
-      if (!findProjectData) throw Error(`Can't find project with ID ${projId}`);
+      if (!findProjectData) throw new HttpException(404, `Can't find project with ID ${projId}`);
+
+      const isUser = req.username === findProjectData.creator;
+      if (findProjectData.private && !isUser) throw new HttpException(401, 'Unauthorized');
 
       const image = req.body.image;
       const uploadImageData: UploadApiResponse = await this.cloudinaryService.uploadImage(image, {
