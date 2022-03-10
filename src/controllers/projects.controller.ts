@@ -26,7 +26,7 @@ class ProjectsController {
 
       // TODO: query with options
       const findAllProjectsData: Project[] = await this.projects
-        .find()
+        .find({ private: { $ne: true } })
         .limit(per_page)
         .skip(per_page * page)
         .populate('creator');
