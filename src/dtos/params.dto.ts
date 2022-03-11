@@ -1,4 +1,4 @@
-import { IsEmail, IsNumber, IsString, Length } from 'class-validator';
+import { IsEmail, IsNumber, IsNumberString, IsString, Length } from 'class-validator';
 
 export class UsernamePathParams {
   @IsString()
@@ -13,8 +13,7 @@ export class ProjectPathParams extends UsernamePathParams {
 }
 
 export class JobNumberPathParams extends ProjectPathParams {
-  // TODO: test if raw string in param can be number type
-  @IsNumber()
+  @IsNumberString()
   public jobnumber: number;
 }
 
