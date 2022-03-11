@@ -108,7 +108,7 @@ class JobsController {
       const jobNumber = updateProject.jobs.findIndex(x => x._id.toString() == newJobData._id.toString()) + 1;
       if (jobNumber == 0) throw new HttpException(404, `Error creating job`);
 
-      const newJobWithJobNumberData = await this.jobs.findByIdAndUpdate(newJobData._id, { jobNumber }, { new: true });
+      const newJobWithJobNumberData = await this.jobs.findByIdAndUpdate(newJobData._id, { jobNumber }, { new: true }).populate('project');
 
       res.status(201).json({ data: newJobWithJobNumberData, message: 'created' });
     } catch (error) {
