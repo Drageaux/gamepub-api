@@ -8,14 +8,13 @@ export interface Job {
   title: string;
   body?: string;
   imageUrl?: string;
-  // comments?: JobComment[];
 }
 
 export interface JobComment {
   _id: Types.ObjectId;
   user: string;
-  project?: Types.ObjectId | Project;
-  job?: Types.ObjectId | Job;
+  project: Types.ObjectId | Project;
+  job: Types.ObjectId | Job;
   body: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
