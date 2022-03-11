@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import { User } from './users.interface';
 import { Job } from './job.interface';
 
 export interface Project {
