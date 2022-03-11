@@ -48,10 +48,19 @@ class JobsRoute implements Routes {
       this.jobsController.createJob,
     );
 
-    // JOB COMMENTS
-    this.router.get(`/users/:username/projects/:projectname${this.path}/:jobnumber/comments`, this.jobsController.getJobComments);
+    // JOB COMMENTS, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
+    this.router.get(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/comments`,
+      softCheckUser,
+      injectUsername,
+      validationMiddleware(JobNumberPathParams, 'params'),
+      this.jobsController.getJobComments,
+    );
     this.router.post(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/comments`,
+      softCheckUser,
+      injectUsername,
+      validationMiddleware(JobNumberPathParams, 'params'),
       validationMiddleware(CreateJobCommentDto, 'body'),
       this.jobsController.postJobComment,
     );
