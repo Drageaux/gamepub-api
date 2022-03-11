@@ -16,4 +16,6 @@ export interface JobComment {
   project: Types.ObjectId | Project;
   job: Types.ObjectId | Job;
   body: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
