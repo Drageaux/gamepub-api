@@ -40,6 +40,14 @@ export const softCheckUser = jwt({
   ...jwtOptions,
 });
 
+/**
+ * Authorization middleware. Throws Unauthorized error if not signed in.
+ * Example use case: list private projects.
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
 export const requireUser = jwt({
   credentialsRequired: true,
   ...jwtOptions,
@@ -48,8 +56,11 @@ export const requireUser = jwt({
 const usersService = new UserService();
 
 /**
- * Pull userinfo, then inject username.
- * ALWAYS call after jwt has injected data into req.user.
+ * Pull userinfo, then inject into req.username.
+ * ALWAYS call AFTER jwt has injected data into req.user (by using softCheckUser or requireUser).
+ * Example use case: compare if req.params.username == req.username
+ *
+ * Prerequisite - softCheckUser or requireUser middleware
  *
  * @param req
  * @param res
