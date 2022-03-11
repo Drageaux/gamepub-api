@@ -146,12 +146,14 @@ class JobsController {
     }
   };
 
-  public postJobComment = async (req: Request, res: Response, next: NextFunction) => {
+  public postJobComment = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
+      if (!req.username) throw new HttpException(401, 'Unauthorized.');
       const body = req.body.body;
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const createCommentData = await this.jobComments.create({
+        user: req.username,
         project: findJob.project,
         job: findJob._id,
         body,
