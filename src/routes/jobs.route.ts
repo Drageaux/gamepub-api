@@ -1,9 +1,8 @@
-import { CreateJobCommentDto } from './../dtos/jobs.dto';
 import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import JobsController from '@/controllers/jobs.controller';
 import validationMiddleware from '@/middlewares/validation.middleware';
-import { CreateJobDto } from '@/dtos/jobs.dto';
+import { CreateJobCommentDto, CreateJobDto } from '@/dtos/jobs.dto';
 import { softCheckUser, injectUsername, requireUser } from '@/middlewares/auth.middleware';
 import { JobNumberPathParams, ProjectPathParams } from '@/dtos/params.dto';
 

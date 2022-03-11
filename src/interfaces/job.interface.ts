@@ -13,8 +13,9 @@ export interface Job {
 
 export interface JobComment {
   _id: Types.ObjectId;
-  project: Types.ObjectId | Project;
-  job: Types.ObjectId | Job;
+  user: string;
+  project?: Types.ObjectId | Project;
+  job?: Types.ObjectId | Job;
   body: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;

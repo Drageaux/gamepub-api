@@ -8,7 +8,7 @@ const jobSchema: Schema = new Schema(
     title: { type: String, required: true },
     body: String,
     imageUrl: String,
-    // comments: [{ type: Schema.Types.ObjectId, ref: 'JobComment', index: true }],
+    comments: [{ type: Schema.Types.ObjectId, ref: 'JobComment', index: true }],
   },
   { timestamps: true },
 ).index({ project: 1, jobNumber: 1 }, { unique: true });
