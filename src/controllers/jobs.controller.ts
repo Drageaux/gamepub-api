@@ -9,6 +9,7 @@ import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
 import jobCommentModel from '@/models/job-comments.model';
 import { HydratedDocument, Document } from 'mongoose';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 class JobsController {
   jobs = jobModel;
@@ -39,7 +40,7 @@ class JobsController {
    * @param res
    * @param next
    */
-  public getJobsByProjectFullPath = async (req: Request, res: Response, next: NextFunction) => {
+  public getJobsByProjectFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       // TODO: skip and limit in query
       const findProject = await this.projectsService.getProjectByCreatorAndName(req);
@@ -83,7 +84,7 @@ class JobsController {
    * @param res
    * @param next
    */
-  public createJob = async (req: Request, res: Response, next: NextFunction) => {
+  public createJob = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
       const findProject = await this.projectsService.getProjectByCreatorAndName(req);
