@@ -7,6 +7,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import projectsService from '@services/projects.service';
 import cloudinaryService from '@services/cloudinary.service';
 import { UploadApiResponse, ResourceOptions } from 'cloudinary';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 const MAX_PER_PAGE = 100;
 const DEFAULT_PER_PAGE = 20;
@@ -25,7 +26,7 @@ class ProjectsController {
 
       // TODO: query with options
       const findAllProjectsData: Project[] = await this.projects
-        .find()
+        .find({ private: { $ne: true } })
         .limit(per_page)
         .skip(per_page * page)
         .populate('creator');
@@ -35,19 +36,7 @@ class ProjectsController {
     }
   };
 
-  public getProjectById = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const projectId: string = req.params.id;
-      const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId }).populate('creator');
-      // TODO: access check, is this project public or does it belong to the user
-
-      res.status(200).json({ data: findProjectByIdData, message: 'findOne' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  getProjectByFullPath = async (req: Request, res: Response, next: NextFunction) => {
+  public getProjectByFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const findProjectByNameData: Project = await this.projectsService.getProjectByCreatorAndName(req);
 
@@ -57,28 +46,16 @@ class ProjectsController {
     }
   };
 
-  public createProject = async (req: Request, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, "You're not userData");
-    try {
-      const createProjectData: Project = await this.projects.create({
-        ...req.body,
-      });
-      const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id).populate({ path: 'creator', select: 'username' });
-
-      res.status(201).json({ data: findPopulatedProjectData, message: 'created' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public getProjectsByUsername = async (req: Request, res: Response, next: NextFunction) => {
+  public getProjectsByUsername = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const username: string = req.params.username;
-
-      const { _id } = await this.users.findOne({ username });
-      console.log(_id);
-      const findProjectsByUsername: Project[] = await this.projects.find({ creator: _id });
-      // TODO: access check, is this project public or does it belong to the user
+      const isUser = username === req.username;
+      // access check; if is user then include private
+      // helpful to keep options in the find() call so that skip() and limit() may follow
+      const findProjectsByUsername: Project[] = await this.projects.find({
+        creator: username,
+        private: this.projectsService.getPrivateQueryOptions(isUser),
+      });
 
       res.status(200).json({ data: findProjectsByUsername, message: 'findProjectsByUsername' });
     } catch (error) {
@@ -86,10 +63,28 @@ class ProjectsController {
     }
   };
 
-  public checkName = async (req: Request, res: Response, next: NextFunction) => {
+  public getProjectById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const projectId: string = req.params.id;
+
+      const findProjectByIdData: Project = await this.projects.findOne({ _id: projectId });
+      const isUser = findProjectByIdData.creator === req.username;
+
+      // access check, is this project public or does it belong to the user?
+      if (findProjectByIdData.private && !isUser) {
+        throw new HttpException(401, `You do not have access to this project`);
+      }
+
+      res.status(200).json({ data: findProjectByIdData, message: 'findOne' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public checkName = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const name = req.body.name;
-      const creator = req.body.creator;
+      const creator = req.username;
 
       const checkIfNameExists: Project = await this.projects.findOne({ creator, name });
 
@@ -103,11 +98,36 @@ class ProjectsController {
     }
   };
 
-  public updateProjectImage = async (req: Request, res: Response, next: NextFunction) => {
+  public createProject = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) throw new HttpException(400, 'Bad request.');
     try {
+      const username = req.username;
+      const { name } = req.body;
+      const findOneProject: Project = await this.projects.findOne({ creator: username, name });
+      if (findOneProject) throw new HttpException(409, 'Project already exists.');
+
+      const createProjectData: Project = await this.projects.create({
+        creator: username,
+        ...req.body,
+      });
+      const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id);
+
+      res.status(201).json({ data: findPopulatedProjectData, message: 'created' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateProjectImage = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      if (!req.username) throw new HttpException(401, 'Unauthorized.');
+
       const projId = req.params.id;
       const findProjectData: Project = await this.projects.findById(projId);
-      if (!findProjectData) throw Error(`Can't find project with ID ${projId}`);
+      if (!findProjectData) throw new HttpException(404, `Can't find project with ID ${projId}`);
+
+      const isUser = req.username === findProjectData.creator;
+      if (findProjectData.private && !isUser) throw new HttpException(401, 'Unauthorized');
 
       const image = req.body.image;
       const uploadImageData: UploadApiResponse = await this.cloudinaryService.uploadImage(image, {
@@ -118,6 +138,30 @@ class ProjectsController {
 
       const updateProjectById: Project = await this.projects.findByIdAndUpdate(projId, { imageUrl: uploadImageData.secure_url }, { new: true });
       res.status(200).json({ data: updateProjectById, message: 'updateProjectImage' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /*************************************************************************/
+  /********************************* ADMIN *********************************/
+  /*************************************************************************/
+  public adminCreateProject = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) throw new HttpException(400, 'Bad request.');
+    try {
+      const { creator, name } = req.body;
+      if (name == null) throw new HttpException(400, 'Missing project name');
+      const username = creator ? req.username : null;
+      if (username == null) throw new HttpException(400, 'Missing creator name');
+
+      const findOneProject: Project = await this.projects.findOne({ creator: username, name });
+      if (findOneProject) throw new HttpException(409, 'Project already exists');
+
+      const createProjectData: Project = await this.projects.create({
+        ...req.body,
+      });
+
+      res.status(201).json({ data: createProjectData, message: 'created' });
     } catch (error) {
       next(error);
     }

@@ -7,5 +7,13 @@
     "key": "CLOUDINARY_KEY",
     "secret": "CLOUDINARY_SECRET",
     "url": "CLOUDINARY_URL"
+  },
+  "auth0": {
+    "baseUrl": "BASE_URL",
+    "issuerBaseUrl": "AUTH0_DOMAIN",
+    "audience": "AUTH0_AUDIENCE",
+    "clientId": "AUTH0_M2M_ID",
+    "clientSecret": "AUTH0_M2M_SECRET"
   }
+
 }

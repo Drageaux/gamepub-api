@@ -12,14 +12,7 @@ class JobsService {
     const jobNumber = parseInt(req.params.jobnumber as string);
     const findProject: HydratedDocument<Project> = await this.projectsService.getProjectByCreatorAndName(req);
 
-    const jobsPopulatedProject = await findProject.populate('jobs');
-
-    const findJob = jobsPopulatedProject.jobs
-      .find(x => x.jobNumber === jobNumber)
-      .populate({
-        path: 'project',
-        populate: { path: 'creator' },
-      });
+    const findJob = await this.jobs.findOne({ project: findProject._id, jobNumber });
     if (!findJob) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
 
     return findJob;

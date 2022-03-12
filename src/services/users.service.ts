@@ -1,75 +1,71 @@
-import bcrypt from 'bcrypt';
-import { CreateUserDto } from '@dtos/users.dto';
-import { HttpException } from '@exceptions/HttpException';
-import { User } from '@interfaces/users.interface';
-import userModel from '@models/users.model';
-import { isEmpty } from '@utils/util';
+import config from 'config';
+import { Auth0Config } from '@/interfaces/auth0-config.interface';
+import { ManagementClient, User } from 'auth0';
+import { HttpException } from '@/exceptions/HttpException';
+import { RequestWithUser } from '@/interfaces/auth.interface';
+
+const { issuerBaseUrl, clientId, clientSecret }: Auth0Config = config.get('auth0');
+
+const auth0 = new ManagementClient({
+  domain: issuerBaseUrl,
+  clientId,
+  clientSecret,
+  scope: `read:users create:users update:users delete:users read:roles read:role_members create:role_members`,
+  retry: {
+    enabled: true,
+    maxRetries: 3,
+  },
+});
+// auth0.getAccessToken().then(console.log).catch(console.error);
 
 class UserService {
-  public users = userModel;
-
-  public async findAllUser(): Promise<User[]> {
-    const users: User[] = await this.users.find();
+  public listUsers = async query => {
+    const users = await auth0.getUsers({ q: query });
     return users;
-  }
+  };
 
-  public async findUserById(userId: string): Promise<User> {
-    if (isEmpty(userId)) throw new HttpException(400, "You're not userId");
+  public findUserByUsername = async (username: string): Promise<User> => {
+    const users = await auth0.getUsers({ q: 'username=' + username });
+    if (users.length === 0) throw new HttpException(404, `User ${username} not found.`);
 
-    const findUser: User = await this.users.findOne({ _id: userId });
-    if (!findUser) throw new HttpException(409, "You're not user");
+    return users[0];
+  };
 
-    return findUser;
-  }
+  public findUserById = async (id: string): Promise<User> => {
+    const user = await auth0.getUser({ id });
+    if (!user) throw new HttpException(404, `User not found.`);
 
-  public async findUserByUsername(username: string): Promise<User> {
-    if (isEmpty(username)) throw new HttpException(400, "You're not userId");
+    return user;
+  };
 
-    const findUser: User = await this.users.findOne({ username });
-    if (!findUser) throw new HttpException(409, "You're not user");
+  public getUserRoles = async (id: string) => {
+    return await auth0.getUserRoles({ id });
+  };
 
-    return findUser;
-  }
+  public isAdmin = async (id: string) => {
+    const roles = await this.getUserRoles(id);
+    return !!roles.find(x => x.name === 'Site Admin');
+  };
 
-  public async createUser(userData: CreateUserDto): Promise<User> {
-    if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
-
-    const findUserByEmail: User = await this.users.findOne({ email: userData.email });
-    const findUserByUsername: User = await this.users.findOne({ username: userData.username });
-    if (findUserByEmail) throw new HttpException(409, `The email ${userData.email} is already registered.`);
-    if (findUserByUsername) throw new HttpException(409, `The username ${userData.username} is already taken.`);
-
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-    const createUserData: User = await this.users.create({ ...userData, password: hashedPassword });
-
-    return createUserData;
-  }
-
-  public async updateUser(userId: string, userData: CreateUserDto): Promise<User> {
-    if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
-
-    if (userData.email) {
-      const findUser: User = await this.users.findOne({ email: userData.email });
-      if (findUser && findUser._id != userId) throw new HttpException(409, `Your email ${userData.email} already exists`);
-    }
-
-    if (userData.password) {
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      userData = { ...userData, password: hashedPassword };
-    }
-
-    const updateUserById: User = await this.users.findByIdAndUpdate(userId, { userData });
-    if (!updateUserById) throw new HttpException(409, "You're not user");
-
-    return updateUserById;
-  }
-
-  public async deleteUser(userId: string): Promise<User> {
-    const deleteUserById: User = await this.users.findByIdAndDelete(userId);
-    if (!deleteUserById) throw new HttpException(409, "You're not user");
-
-    return deleteUserById;
-  }
+  /*************************************************************************/
+  /********************************* ADMIN *********************************/
+  /*************************************************************************/
+  public createUser = async (newUser: User, req: RequestWithUser) => {
+    if (this.isAdmin(req.user.sub)) {
+      try {
+        const createdUser = await auth0.createUser({ ...newUser, connection: 'Username-Password-Authentication' });
+        if (createdUser) return createdUser;
+        else throw new HttpException(400, 'Could not create user');
+      } catch (err) {
+        if (err?.originalError?.status === 409) {
+          throw new HttpException(409, 'The user already exists.');
+        } else {
+          console.error(err);
+          throw new HttpException(400, 'Could not process this request.');
+        }
+      }
+    } else throw new HttpException(401, 'You are not admin.');
+  };
 }
 
 export default UserService;

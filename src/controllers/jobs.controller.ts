@@ -9,6 +9,7 @@ import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
 import jobCommentModel from '@/models/job-comments.model';
 import { HydratedDocument, Document } from 'mongoose';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 class JobsController {
   jobs = jobModel;
@@ -39,7 +40,7 @@ class JobsController {
    * @param res
    * @param next
    */
-  public getJobsByProjectFullPath = async (req: Request, res: Response, next: NextFunction) => {
+  public getJobsByProjectFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       // TODO: skip and limit in query
       const findProject = await this.projectsService.getProjectByCreatorAndName(req);
@@ -83,7 +84,7 @@ class JobsController {
    * @param res
    * @param next
    */
-  public createJob = async (req: Request, res: Response, next: NextFunction) => {
+  public createJob = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
       const findProject = await this.projectsService.getProjectByCreatorAndName(req);
@@ -107,7 +108,7 @@ class JobsController {
       const jobNumber = updateProject.jobs.findIndex(x => x._id.toString() == newJobData._id.toString()) + 1;
       if (jobNumber == 0) throw new HttpException(404, `Error creating job`);
 
-      const newJobWithJobNumberData = await this.jobs.findByIdAndUpdate(newJobData._id, { jobNumber }, { new: true });
+      const newJobWithJobNumberData = await this.jobs.findByIdAndUpdate(newJobData._id, { jobNumber }, { new: true }).populate('project');
 
       res.status(201).json({ data: newJobWithJobNumberData, message: 'created' });
     } catch (error) {
@@ -145,12 +146,14 @@ class JobsController {
     }
   };
 
-  public postJobComment = async (req: Request, res: Response, next: NextFunction) => {
+  public postJobComment = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
+      if (!req.username) throw new HttpException(401, 'Unauthorized.');
       const body = req.body.body;
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const createCommentData = await this.jobComments.create({
+        user: req.username,
         project: findJob.project,
         job: findJob._id,
         body,

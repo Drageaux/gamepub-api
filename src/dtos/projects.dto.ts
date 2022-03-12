@@ -1,12 +1,9 @@
-import { IsArray, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
 
 export class CreateProjectDto {
   @Length(3, 100)
   @IsString()
   public name: string;
-
-  @IsString()
-  public creator: string;
 
   @ValidateIf((obj, val) => val != null && val != '')
   @Length(3, 100)
@@ -29,4 +26,14 @@ export class CreateProjectDto {
   @IsString()
   @IsOptional()
   public imageUrl: string;
+
+  @IsBoolean()
+  @IsOptional()
+  public private: boolean;
+}
+
+export class AdminCreateProjectDto extends CreateProjectDto {
+  @IsString()
+  @IsOptional()
+  creator: string;
 }
