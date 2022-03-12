@@ -7,7 +7,7 @@
     "cors": {
         "origin": [
           "https://gamepub-staging.herokuapp.com",
-          "^((https://gamepub-alpha-pr-[\\w\\d]+(-[\\w\\d]+)*).herokuapp.com)$"
+          "^https:\/\/gamepub-alpha-pr-([\\w\\d])+.herokuapp.com$"
         ],
         "credentials": true
     }
