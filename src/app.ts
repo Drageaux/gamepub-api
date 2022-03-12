@@ -75,11 +75,13 @@ class App {
 
   private initializeMiddlewares() {
     this.app.use(morgan(config.get('log.format'), { stream }));
-    console.log('test log cors origin:', config.get('cors.origin'));
     this.app.use(
       cors({
-        origin: config.get('cors.origin'),
-        credentials: config.get('cors.credentials'),
+        origin: config.get<string[]>('cors.origin').map((og, ind) => {
+          if (ind > 0) return new RegExp(og);
+          else return og;
+        }),
+        credentials: true,
       }),
     );
     this.app.use(hpp());
