@@ -78,7 +78,7 @@ class App {
     this.app.use(
       cors({
         origin: config.get<string[]>('cors.origin').map((og, ind) => {
-          if (ind > 0) return new RegExp(og);
+          if (ind > 0) return new RegExp(og, 'i');
           else return og;
         }),
         credentials: true,
