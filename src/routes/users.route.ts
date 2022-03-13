@@ -16,6 +16,7 @@ class UsersRoute implements Routes {
   }
 
   private initializeRoutes() {
+    this.router.get(`/admin`, requireUser, requireAdmin, (req, res) => res.json(200));
     this.router.get(`${this.path}`, requireUser, requireAdmin, this.usersController.getUsers);
     // TODO: hide private user information with soft JWT check and username injection
     this.router.get(`${this.path}/:username`, validationMiddleware(UsernamePathParams, 'params'), this.usersController.getUserByUsername);
