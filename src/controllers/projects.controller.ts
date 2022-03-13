@@ -28,8 +28,7 @@ class ProjectsController {
       const findAllProjectsData: Project[] = await this.projects
         .find({ private: { $ne: true } })
         .limit(per_page)
-        .skip(per_page * page)
-        .populate('creator');
+        .skip(per_page * page);
       res.status(200).json({ data: findAllProjectsData, message: 'findAll' });
     } catch (error) {
       next(error);
@@ -110,9 +109,8 @@ class ProjectsController {
         creator: username,
         ...req.body,
       });
-      const findPopulatedProjectData: Project = await this.projects.findById(createProjectData._id);
 
-      res.status(201).json({ data: findPopulatedProjectData, message: 'created' });
+      res.status(201).json({ data: createProjectData, message: 'created' });
     } catch (error) {
       next(error);
     }
