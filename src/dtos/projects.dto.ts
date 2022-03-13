@@ -37,3 +37,8 @@ export class AdminCreateProjectDto extends CreateProjectDto {
   @IsOptional()
   creator: string;
 }
+
+export class CheckProjectNameDto {
+  @IsString()
+  name: string;
+}

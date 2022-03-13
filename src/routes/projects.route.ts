@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import ProjectsController from '@/controllers/projects.controller';
-import { AdminCreateProjectDto, CreateProjectDto } from '@/dtos/projects.dto';
+import { AdminCreateProjectDto, CheckProjectNameDto, CreateProjectDto } from '@/dtos/projects.dto';
 import { injectUsername, requireAdmin, requireUser, softCheckUser } from '@/middlewares/auth.middleware';
 import { IdPathParams, UsernamePathParams, ProjectPathParams } from '@/dtos/params.dto';
 
@@ -43,7 +43,13 @@ class ProjectsRoute implements Routes {
     );
 
     // ONLY ALLOW IF USER
-    this.router.post(`${this.path}/check-name`, requireUser, injectUsername, this.projectsController.checkName);
+    this.router.post(
+      `${this.path}/check-name`,
+      requireUser,
+      injectUsername,
+      validationMiddleware(CheckProjectNameDto, 'body'),
+      this.projectsController.checkName,
+    );
     this.router.post(
       `${this.path}`,
       requireUser,
