@@ -27,7 +27,7 @@ class JobsController {
         populate: { path: 'creator' },
       });
 
-      res.status(201).json({ data: findJobs, message: 'findAll' });
+      res.status(200).json({ data: findJobs, message: 'findAll' });
     } catch (error) {
       next(error);
     }
@@ -51,7 +51,7 @@ class JobsController {
         })
       ).jobs;
 
-      res.status(201).json({ data: jobs, message: 'findByProject' });
+      res.status(200).json({ data: jobs, message: 'findByProject' });
     } catch (error) {
       next(error);
     }
@@ -127,7 +127,7 @@ class JobsController {
     try {
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
 
-      res.status(201).json({ data: findJob, message: 'findOne' });
+      res.status(200).json({ data: findJob, message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -140,7 +140,7 @@ class JobsController {
         job: findJob._id,
       });
 
-      res.status(201).json({ data: findCommentsByJob, message: 'findAll' });
+      res.status(200).json({ data: findCommentsByJob, message: 'findAll' });
     } catch (error) {
       next(error);
     }
