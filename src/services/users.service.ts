@@ -47,6 +47,10 @@ class UserService {
     return !!roles.find(x => x.name === 'Site Admin');
   };
 
+  public getPrivateQueryOptions = (isUser: boolean) => {
+    return isUser ? { $in: [true, false, undefined, null] } : { $ne: true };
+  };
+
   /*************************************************************************/
   /********************************* ADMIN *********************************/
   /*************************************************************************/
