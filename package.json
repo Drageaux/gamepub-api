@@ -1,9 +1,8 @@
 {
   "name": "gamepub-api",
   "version": "0.0.0",
-  "description": "TypeScript + Mongoose + MongoDB + Express API Server",
+  "description": "GamePub API: TypeScript + Mongoose + MongoDB + Express API Server",
   "author": "David Thong Nguyen",
-  "license": "ISC",
   "scripts": {
     "start": "npm run build && node dist/server.js",
     "dev": "cross-env NODE_ENV=development nodemon",
@@ -35,6 +34,7 @@
     "jwks-rsa": "^2.0.5",
     "mongoose": "^6.2.3",
     "morgan": "^1.10.0",
+    "nanoid": "^3.3.2",
     "pm2": "^5.1.0",
     "swagger-jsdoc": "^6.0.0",
     "swagger-ui-express": "^4.1.6",
