@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import projectModel from '@/models/projects.model';
-import userModel from '@/models/users.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
-import projectsService from '@services/projects.service';
-import cloudinaryService from '@services/cloudinary.service';
-import { UploadApiResponse, ResourceOptions } from 'cloudinary';
 import { RequestWithUser } from '@/interfaces/auth.interface';
-import assetModel from '@/models/assets.model';
 import { Asset } from '@/interfaces/asset.interface';
+import userModel from '@/models/users.model';
+import assetModel from '@/models/assets.model';
 import usersService from '@/services/users.service';
+import namingService from '@/services/naming.service';
+
+import { customAlphabet } from 'nanoid';
 
 const MAX_PER_PAGE = 100;
 const DEFAULT_PER_PAGE = 20;
@@ -17,6 +16,7 @@ const DEFAULT_PAGE = 0;
 
 class AssetsController {
   public usersService = new usersService();
+  public namingService = new namingService();
 
   assets = assetModel;
   users = userModel;
@@ -105,13 +105,14 @@ class AssetsController {
     try {
       const username = req.username;
       const { displayName } = req.body;
-      // TODO: handle duplicate
+
+      // TODO: handle duplicate if applicable
       // const findOne: Asset = await this.assets.findOne({ creator: username, name });
       // if (findOne) throw new HttpException(409, 'Asset already exists.');
-
       const createData: Asset = await this.assets.create({
         creator: username,
         ...req.body,
+        slug: this.namingService.slugify(displayName),
       });
 
       res.status(201).json({ data: createData, message: 'created' });

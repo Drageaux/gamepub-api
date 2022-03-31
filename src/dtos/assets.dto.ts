@@ -3,7 +3,6 @@ import { IsArray, IsBoolean, IsOptional, IsString, Length } from 'class-validato
 export class CreateAssetDto {
   @Length(3, 100)
   @IsString()
-  @IsOptional()
   public displayName: string;
 
   @IsString()
