@@ -65,19 +65,22 @@ class AssetsController {
     }
   };
 
-  public getOneById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getOneByPuid = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
-      const id: string = req.params.id;
+      const puid: string = req.params.puid;
 
-      const findByIdData: Asset = await this.assets.findOne({ _id: id });
-      const isUser = findByIdData.creator === req.username;
+      const findByPuidData: Asset = await this.assets.findOne({ puid });
+      if (!findByPuidData) {
+        throw new HttpException(404, `Asset does not exist`);
+      }
+      const isUser = findByPuidData.creator === req.username;
 
-      // access check, is this project public or does it belong to the user?
-      if (findByIdData.private && !isUser) {
-        throw new HttpException(401, `You do not have access to this project`);
+      // access check, is this asset public or does it belong to the user?
+      if (findByPuidData.private && !isUser) {
+        throw new HttpException(401, `You do not have access to this asset`);
       }
 
-      res.status(200).json({ data: findByIdData, message: 'findOne' });
+      res.status(200).json({ data: findByPuidData, message: 'findOne' });
     } catch (error) {
       next(error);
     }

@@ -29,11 +29,11 @@ class AssetsRoute implements Routes {
       this.assetsController.getByUsername,
     );
     this.router.get(
-      `${this.path}/:id`,
+      `${this.path}/:puid`,
       softCheckUser,
       injectUsername,
       validationMiddleware(IdPathParams, 'params'),
-      this.assetsController.getOneById,
+      this.assetsController.getOneByPuid,
     );
 
     // ONLY ALLOW IF USER
