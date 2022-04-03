@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "description": "TypeScript + Mongoose + MongoDB + Express API Server",
   "author": "David Thong Nguyen",
-  "license": "ISC",
   "scripts": {
     "start": "npm run build && node dist/server.js",
     "dev": "cross-env NODE_ENV=development nodemon",
