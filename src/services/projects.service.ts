@@ -1,7 +1,6 @@
 import { HydratedDocument } from 'mongoose';
 import { HttpException } from '@exceptions/HttpException';
 import { Project } from '@interfaces/project.interface';
-import { User } from '@interfaces/users.interface';
 import projectModel from '@models/projects.model';
 import userModel from '@models/users.model';
 import { RequestWithUser } from '@/interfaces/auth.interface';
@@ -27,28 +26,6 @@ class ProjectsService {
 
     return findProjectByNameData;
   }
-
-  public getPrivateQueryOptions = (isUser: boolean) => {
-    return isUser ? { $in: [true, false, undefined, null] } : { $ne: true };
-  };
-  // public generateUniformProjectName(projectName: string) {
-  //   const result = projectName
-  //     .trim()
-  //     .toLocaleLowerCase()
-  //     .split(' ')
-  //     .reduce((prev, curr, index) => {
-  //       let res = '';
-  //       if (index > 0) {
-  //         res += '-';
-  //       }
-  //       return prev + res + curr;
-  //     }, '');
-  //   return result;
-  // }
-
-  // generateProjectPath(username, projectName) {
-  //   return username + '/' + this.generateUniformProjectName(projectName);
-  // }
 }
 
 export default ProjectsService;

@@ -7,9 +7,10 @@ import UsersRoute from '@routes/users.route';
 import ProjectsRoute from '@routes/projects.route';
 import JobsRoute from '@routes/jobs.route';
 import validateEnv from '@utils/validateEnv';
+import AssetsRoute from './routes/assets.route';
 
 validateEnv();
 
-const app = new App([new IndexRoute(), new UsersRoute(), new ProjectsRoute(), new JobsRoute()]);
+const app = new App([new IndexRoute(), new UsersRoute(), new ProjectsRoute(), new JobsRoute(), new AssetsRoute()]);
 
 app.listen();

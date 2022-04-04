@@ -8,6 +8,7 @@ import projectsService from '@services/projects.service';
 import cloudinaryService from '@services/cloudinary.service';
 import { UploadApiResponse, ResourceOptions } from 'cloudinary';
 import { RequestWithUser } from '@/interfaces/auth.interface';
+import usersService from '@/services/users.service';
 
 const MAX_PER_PAGE = 100;
 const DEFAULT_PER_PAGE = 20;
@@ -15,6 +16,7 @@ const DEFAULT_PAGE = 0;
 
 class ProjectsController {
   public projectsService = new projectsService();
+  public usersService = new usersService();
   public cloudinaryService = new cloudinaryService();
   projects = projectModel;
   users = userModel;
@@ -53,7 +55,7 @@ class ProjectsController {
       // helpful to keep options in the find() call so that skip() and limit() may follow
       const findProjectsByUsername: Project[] = await this.projects.find({
         creator: username,
-        private: this.projectsService.getPrivateQueryOptions(isUser),
+        private: this.usersService.getPrivateQueryOptions(isUser),
       });
 
       res.status(200).json({ data: findProjectsByUsername, message: 'findProjectsByUsername' });
