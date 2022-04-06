@@ -171,9 +171,11 @@ class JobsController {
 
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
 
-      const addSubscriber = await this.jobs.updateOne({ _id: findJob._id }, { $addToSet: { subscribers: req.username } });
+      const addSubscriberData = await this.jobs
+        .findOneAndUpdate({ _id: findJob._id }, { $addToSet: { subscribers: req.username } }, { new: true })
+        .populate('project');
 
-      res.status(200).json({ message: 'subscribed' });
+      res.status(200).json({ data: addSubscriberData, message: 'subscribed' });
     } catch (error) {
       next(error);
     }
