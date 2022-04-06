@@ -164,6 +164,20 @@ class JobsController {
       next(error);
     }
   };
+
+  public subscribeToAJob = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      if (!req.username) throw new HttpException(401, 'Unauthorized.');
+
+      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
+
+      const addSubscriber = await this.jobs.updateOne({ _id: findJob._id }, { $addToSet: { subscribers: req.username } });
+
+      res.status(200).json({ message: 'subscribed' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default JobsController;
