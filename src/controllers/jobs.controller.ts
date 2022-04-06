@@ -169,13 +169,32 @@ class JobsController {
     try {
       if (!req.username) throw new HttpException(401, 'Unauthorized.');
 
-      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const jobNumber = parseInt(req.params.jobnumber as string);
+      const findProject = await this.projectsService.getProjectByCreatorAndName(req);
 
       const addSubscriberData = await this.jobs
-        .findOneAndUpdate({ _id: findJob._id }, { $addToSet: { subscribers: req.username } }, { new: true })
+        .findOneAndUpdate({ project: findProject._id, jobNumber }, { $addToSet: { subscribers: req.username } }, { new: true })
         .populate('project');
 
       res.status(200).json({ data: addSubscriberData, message: 'subscribed' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public unsubscribeFromAJob = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      if (!req.username) throw new HttpException(401, 'Unauthorized.');
+
+      console.log(req.username);
+      const jobNumber = parseInt(req.params.jobnumber as string);
+      const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+
+      const removeSubscriberData = await this.jobs
+        .findOneAndUpdate({ project: findProject._id, jobNumber }, { $pull: { subscribers: req.username } }, { new: true })
+        .populate('project');
+
+      res.status(200).json({ data: removeSubscriberData, message: 'unsubscribed' });
     } catch (error) {
       next(error);
     }

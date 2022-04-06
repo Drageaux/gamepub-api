@@ -19,7 +19,7 @@ class JobsRoute implements Routes {
     // PUBLIC JOBS
     this.router.get(`${this.path}`, this.jobsController.getJobs);
 
-    // PROJECT SPECIFIC JOBS, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
+    // PROJECT SPECIFIC JOBS, IF PUBLIC OR IF PRIVATE BUT IS OWNER
     // TODO: consider private jobs
     this.router.get(
       `/users/:username/projects/:projectname${this.path}`,
@@ -35,12 +35,20 @@ class JobsRoute implements Routes {
       validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.getJobByJobNumber,
     );
+    // PROJECT SPECIFIC JOBS, REQUIRE USERNAME, IF PUBLIC OR IF PRIVATE BUT IS OWNER
     this.router.put(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/subscribe`,
       requireUser,
       injectUsername,
       validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.subscribeToAJob,
+    );
+    this.router.put(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/unsubscribe`,
+      requireUser,
+      injectUsername,
+      validationMiddleware(JobNumberPathParams, 'params'),
+      this.jobsController.unsubscribeFromAJob,
     );
     // this.router.get(`/projects/:projectid${this.path}`, this.jobsController.getJobsByProjectId);
 
