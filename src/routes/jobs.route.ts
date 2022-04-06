@@ -36,7 +36,7 @@ class JobsRoute implements Routes {
       this.jobsController.getJobByJobNumber,
     );
     this.router.put(
-      `/users/:username/projects/:projectname${this.path}/:jobnumber`,
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/subscribe`,
       requireUser,
       injectUsername,
       validationMiddleware(JobNumberPathParams, 'params'),
