@@ -186,7 +186,6 @@ class JobsController {
     try {
       if (!req.username) throw new HttpException(401, 'Unauthorized.');
 
-      console.log(req.username);
       const jobNumber = parseInt(req.params.jobnumber as string);
       const findProject = await this.projectsService.getProjectByCreatorAndName(req);
 
