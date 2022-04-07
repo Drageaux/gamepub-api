@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import jobModel from '@models/jobs.model';
-import userModel from '@models/users.model';
 import projectModel from '@models/projects.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@exceptions/HttpException';
@@ -15,7 +14,6 @@ class JobsController {
   jobs = jobModel;
   jobComments = jobCommentModel;
   projects = projectModel;
-  users = userModel;
   public projectsService = new projectsService();
   public jobsService = new jobsService();
 

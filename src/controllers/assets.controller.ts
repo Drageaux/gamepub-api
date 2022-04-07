@@ -3,12 +3,9 @@ import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import { Asset } from '@/interfaces/asset.interface';
-import userModel from '@/models/users.model';
 import assetModel from '@/models/assets.model';
 import usersService from '@/services/users.service';
 import namingService from '@/services/naming.service';
-
-import { customAlphabet } from 'nanoid';
 
 const MAX_PER_PAGE = 100;
 const DEFAULT_PER_PAGE = 20;
@@ -19,7 +16,6 @@ class AssetsController {
   public namingService = new namingService();
 
   assets = assetModel;
-  users = userModel;
 
   public getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {

@@ -1,7 +1,6 @@
 import { Project } from '@/interfaces/project.interface';
 import { NextFunction, Request, Response } from 'express';
 import projectModel from '@/models/projects.model';
-import userModel from '@/models/users.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@/exceptions/HttpException';
 import projectsService from '@services/projects.service';
@@ -19,7 +18,6 @@ class ProjectsController {
   public usersService = new usersService();
   public cloudinaryService = new cloudinaryService();
   projects = projectModel;
-  users = userModel;
 
   public getProjects = async (req: Request, res: Response, next: NextFunction) => {
     try {

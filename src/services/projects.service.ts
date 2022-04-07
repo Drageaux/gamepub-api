@@ -2,11 +2,9 @@ import { HydratedDocument } from 'mongoose';
 import { HttpException } from '@exceptions/HttpException';
 import { Project } from '@interfaces/project.interface';
 import projectModel from '@models/projects.model';
-import userModel from '@models/users.model';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 
 class ProjectsService {
-  public users = userModel;
   public projects = projectModel;
 
   public async getProjectByCreatorAndName(req: RequestWithUser): Promise<HydratedDocument<Project>> {
