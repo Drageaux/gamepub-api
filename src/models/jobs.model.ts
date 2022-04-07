@@ -11,8 +11,12 @@ const jobSchema: Schema = new Schema(
     comments: [{ type: Schema.Types.ObjectId, ref: 'JobComment', index: true }],
     subscribers: [String],
   },
-  { timestamps: true },
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 ).index({ project: 1, jobNumber: 1 }, { unique: true });
+
+jobSchema.virtual('private').get(function () {
+  return this.project.private;
+});
 
 const jobModel = model<Job & Document>('Job', jobSchema);
 

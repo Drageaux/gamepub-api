@@ -9,6 +9,7 @@ export interface Job {
   body?: string;
   imageUrl?: string;
   subscribers?: string[];
+  private?: boolean;
 }
 
 export interface JobComment {
