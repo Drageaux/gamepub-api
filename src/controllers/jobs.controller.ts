@@ -22,10 +22,21 @@ class JobsController {
   public getJobs = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // TODO: limit to 20 jobs by default, then limit to 100 max
-      const findJobs: Job[] = await this.jobs.find().populate({
-        path: 'project',
-        populate: { path: 'creator' },
-      });
+      const findJobs: Job[] = await this.projects
+        .aggregate()
+        .match({
+          private: { $ne: true },
+          'jobs.0': { $exists: true },
+        })
+        .lookup({
+          from: 'jobs',
+          localField: 'jobs',
+          foreignField: '_id',
+          as: 'jobs',
+        })
+        .unwind('$jobs')
+        .replaceRoot({ $mergeObjects: ['$jobs', { project: '$$ROOT' }] })
+        .project({ 'project.jobs': 0 });
 
       res.status(200).json({ data: findJobs, message: 'findAll' });
     } catch (error) {
