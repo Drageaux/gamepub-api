@@ -7,12 +7,14 @@ import { Job, JobComment } from '@interfaces/job.interface';
 import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
 import jobCommentModel from '@/models/job-comments.model';
+import jobSubmissionModel from '@/models/job-submissions.model';
 import { HydratedDocument, Document } from 'mongoose';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 
 class JobsController {
   jobs = jobModel;
   jobComments = jobCommentModel;
+  jobSubmissions = jobSubmissionModel;
   projects = projectModel;
   public projectsService = new projectsService();
   public jobsService = new jobsService();
@@ -181,6 +183,18 @@ class JobsController {
         .populate('project');
 
       res.status(200).json({ data: removeSubscriberData, message: 'unsubscribed' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  //
+  public getSubmissionsByJobFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const allSubmissionsData = await this.jobSubmissions.find({ job: job._id });
+
+      res.status(200).json({ data: allSubmissionsData, message: 'getAll' });
     } catch (error) {
       next(error);
     }
