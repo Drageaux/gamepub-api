@@ -10,6 +10,8 @@ export interface Job {
   imageUrl?: string;
   subscribers?: string[];
   private?: boolean;
+
+  submissionsCount?: number;
 }
 
 export interface JobComment {
@@ -24,8 +26,6 @@ export interface JobComment {
 
 export interface JobSubmission {
   _id: Types.ObjectId;
-  user: string;
-  project: Types.ObjectId | Project;
   job: Types.ObjectId | Job;
   githubRepo: string;
   description?: string;

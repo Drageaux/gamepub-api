@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import { Job } from './job.interface';
 
 export interface Project {
   _id: Types.ObjectId;
