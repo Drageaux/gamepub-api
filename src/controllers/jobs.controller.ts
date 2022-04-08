@@ -213,6 +213,24 @@ class JobsController {
       next(error);
     }
   };
+
+  public postSubmissionByJobNumberFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
+    try {
+      if (!req.username) throw new HttpException(401, 'Unauthorized.');
+
+      const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const newSubmission = await this.jobSubmissions.create({
+        user: req.username,
+        job: job._id,
+        ...req.body,
+      });
+
+      res.status(201).json({ data: newSubmission, message: 'created' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default JobsController;
