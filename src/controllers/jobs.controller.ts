@@ -91,15 +91,10 @@ class JobsController {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
       const findProject = await this.projectsService.getProjectByCreatorAndName(req);
-      const findJobsByProject = await this.jobs.find({ project: findProject._id }).sort({ jobNumber: -1 });
-      console.log(findJobsByProject);
 
-      const jobNumber = findJobsByProject[0]?.jobNumber || 1;
-      if (jobNumber == 0) throw new HttpException(404, `Error creating job`);
       const newJobData: HydratedDocument<Job> = await this.jobs.create({
         project: findProject._id,
         ...req.body,
-        jobNumber,
       });
 
       res.status(201).json({ data: newJobData, message: 'created' });
