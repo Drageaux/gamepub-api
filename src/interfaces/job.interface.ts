@@ -17,7 +17,6 @@ export interface Job {
 export interface JobComment {
   _id: Types.ObjectId;
   user: string;
-  project: Types.ObjectId | Project;
   job: Types.ObjectId | Job;
   body: string;
   createdAt?: string | Date;
@@ -28,7 +27,7 @@ export interface JobSubmission {
   _id: Types.ObjectId;
   job: Types.ObjectId | Job;
   githubRepo: string;
-  description?: string;
+  body?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
