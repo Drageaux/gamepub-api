@@ -21,3 +21,14 @@ export interface JobComment {
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
+
+export interface JobSubmission {
+  _id: Types.ObjectId;
+  user: string;
+  project: Types.ObjectId | Project;
+  job: Types.ObjectId | Job;
+  githubRepo: string;
+  description?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
