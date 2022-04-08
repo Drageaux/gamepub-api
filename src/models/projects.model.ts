@@ -9,7 +9,7 @@ const projectSchema: Schema = new Schema({
   imageUrl: { type: String, trim: true },
   tags: [String],
   description: { type: String, trim: true },
-  jobs: [{ type: Schema.Types.ObjectId, ref: 'Job' }],
+  jobsCount: { type: Number, default: 0 },
   private: Boolean,
 }).index({ creator: 1, name: 1 }, { unique: true });
 

@@ -8,6 +8,6 @@ export interface Project {
   displayName?: string;
   githubRepo?: string;
   imageUrl?: string;
-  jobs?: Types.DocumentArray<Job>;
+  jobsCount?: number;
   private?: boolean;
 }

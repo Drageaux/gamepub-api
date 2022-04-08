@@ -52,13 +52,7 @@ class JobsController {
   public getJobsByProjectFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       // TODO: skip and limit in query
-      const findProject = await this.projectsService.getProjectByCreatorAndName(req);
-      const jobs = (
-        await findProject.populate({
-          path: 'jobs',
-          options: { sort: { createdAt: 1 } },
-        })
-      ).jobs;
+      const jobs = await this.jobsService.getJobsByProjectWithFullPath(req, { populate: true });
 
       res.status(200).json({ data: jobs, message: 'findByProject' });
     } catch (error) {
@@ -97,29 +91,18 @@ class JobsController {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
       const findProject = await this.projectsService.getProjectByCreatorAndName(req);
-      const newJobData: HydratedDocument<Job> = await this.jobs.create({ project: findProject._id, ...req.body });
+      const findJobsByProject = await this.jobs.find({ project: findProject._id }).sort({ jobNumber: -1 });
+      console.log(findJobsByProject);
 
-      // suppose there are many pushes at nearly the same moment
-      // they will still be sorted by creation date before getting assigned a job number
-      const updateProject = await this.projects
-        .findByIdAndUpdate(
-          findProject._id,
-          {
-            $push: {
-              jobs: newJobData._id,
-            },
-          },
-          { new: true },
-        )
-        .populate('jobs')
-        .sort({ createdAt: 1 }); // sort to add number
-
-      const jobNumber = updateProject.jobs.findIndex(x => x._id.toString() == newJobData._id.toString()) + 1;
+      const jobNumber = findJobsByProject[0]?.jobNumber || 1;
       if (jobNumber == 0) throw new HttpException(404, `Error creating job`);
+      const newJobData: HydratedDocument<Job> = await this.jobs.create({
+        project: findProject._id,
+        ...req.body,
+        jobNumber,
+      });
 
-      const newJobWithJobNumberData = await this.jobs.findByIdAndUpdate(newJobData._id, { jobNumber }, { new: true }).populate('project');
-
-      res.status(201).json({ data: newJobWithJobNumberData, message: 'created' });
+      res.status(201).json({ data: newJobData, message: 'created' });
     } catch (error) {
       next(error);
     }
