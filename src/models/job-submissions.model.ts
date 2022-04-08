@@ -20,6 +20,7 @@ jobSubmissionSchema.pre('save', async function (next) {
     return;
   }
 
+  // TODO: format code and don't auto increment after error
   // auto increment submission count
   try {
     const updatedJob: Job = await jobModel.findByIdAndUpdate(this.job, { $inc: { submissionsCount: 1 } }, { new: true });

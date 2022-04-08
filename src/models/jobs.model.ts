@@ -23,6 +23,7 @@ jobSchema.pre('save', async function (next) {
     return;
   }
 
+  // TODO: format code and don't auto increment after error
   // auto increment job count
   try {
     const updatedProject = await projectModel.findByIdAndUpdate(this.project, { $inc: { jobsCount: 1 } }, { new: true });
