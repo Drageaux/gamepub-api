@@ -17,6 +17,23 @@ class JobsService {
 
     return findJob;
   }
+
+  public async getJobsByProjectWithFullPath(
+    req,
+    options: {
+      populate?: boolean;
+      skip?: number;
+      limit?: number;
+    },
+  ) {
+    const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+
+    let query = this.jobs.find({ project: findProject._id });
+    if (options.populate) query = query.populate('project');
+    const findJobs = await query;
+
+    return findJobs;
+  }
 }
 
 export default JobsService;
