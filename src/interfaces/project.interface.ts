@@ -7,6 +7,7 @@ export interface Project {
   displayName?: string;
   githubRepo?: string;
   imageUrl?: string;
-  jobsCount?: number;
   private?: boolean;
+  // counters
+  jobsCount?: number;
 }

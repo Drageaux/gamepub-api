@@ -10,7 +10,7 @@ export interface Job {
   imageUrl?: string;
   subscribers?: string[];
   private?: boolean;
-
+  // counters
   submissionsCount?: number;
 }
 
