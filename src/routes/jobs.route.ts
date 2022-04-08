@@ -58,6 +58,13 @@ class JobsRoute implements Routes {
       validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.getSubmissionsByJobFullPath,
     );
+    this.router.get(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber`,
+      requireUser,
+      injectUsername,
+      validationMiddleware(JobSubmissionPathParams, 'params'),
+      this.jobsController.getSubmissionByFullPath,
+    );
     // this.router.get(`/projects/:projectid${this.path}`, this.jobsController.getJobsByProjectId);
 
     // JOB'S PROJECT OWNER ONLY

@@ -194,7 +194,19 @@ class JobsController {
       const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const allSubmissionsData = await this.jobSubmissions.find({ job: job._id });
 
-      res.status(200).json({ data: allSubmissionsData, message: 'getAll' });
+      res.status(200).json({ data: allSubmissionsData, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getSubmissionByFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const submissionNumber = parseInt(req.params.submissionnumber as string);
+      const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const findSubmission = await this.jobSubmissions.findOne({ job: job._id, submissionNumber });
+
+      res.status(200).json({ data: findSubmission, message: 'findOne' });
     } catch (error) {
       next(error);
     }
