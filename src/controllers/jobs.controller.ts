@@ -206,6 +206,8 @@ class JobsController {
       const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const findSubmission = await this.jobSubmissions.findOne({ job: job._id, submissionNumber });
 
+      if (!findSubmission) throw new HttpException(404, 'Job submission not found');
+
       res.status(200).json({ data: findSubmission, message: 'findOne' });
     } catch (error) {
       next(error);
