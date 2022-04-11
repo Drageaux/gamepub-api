@@ -3,8 +3,8 @@ import { Job } from '@interfaces/job.interface';
 
 const jobSchema: Schema = new Schema(
   {
+    jobNumber: { type: Number, required: true },
     project: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
-    jobNumber: { type: Number, default: 1 },
     title: { type: String, required: true, trim: true },
     body: { type: String, trim: true },
     imageUrl: { type: String, trim: true },

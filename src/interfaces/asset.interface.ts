@@ -6,5 +6,6 @@ export interface Asset {
   creator: string;
   displayName: string;
   githubRepo: string;
+  body?: string;
   private?: boolean;
 }
