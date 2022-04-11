@@ -1,14 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import jobModel from '@models/jobs.model';
 import projectModel from '@models/projects.model';
+import jobCommentModel from '@/models/job-comments.model';
+import jobSubmissionModel from '@/models/job-submissions.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@exceptions/HttpException';
 import { Job, JobComment } from '@interfaces/job.interface';
 import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
-import jobCommentModel from '@/models/job-comments.model';
-import jobSubmissionModel from '@/models/job-submissions.model';
-import { HydratedDocument, Document } from 'mongoose';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 
 class JobsController {
@@ -91,17 +90,35 @@ class JobsController {
    */
   public createJob = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
-    try {
-      const findProject = await this.projectsService.getProjectByCreatorAndName(req);
 
-      const newJobData: HydratedDocument<Job> = await this.jobs.create({
-        project: findProject._id,
-        ...req.body,
-      });
+    // retry 3 times, maybe unnecessary, but could be unlucky
+    let tries = 0;
+    const maxTries = 3;
+    while (true) {
+      try {
+        // "auto"-increment jobs count to account for concurrent requests
+        const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+        const updatedProject = await findProject.updateOne({ $inc: { jobsCount: 1 } }, { new: true });
+        // get the earliest job count, reducing likelihood of duplicate key
+        const jobNumber = updatedProject.jobsCount;
+        const newJobData = await this.jobs
+          .create({
+            project: updatedProject._id,
+            ...req.body,
+            jobNumber,
+          })
+          .catch(async () => {
+            // revert incremented count if error
+            await updatedProject.updateOne({ $inc: { jobsCount: -1 } });
+            throw new HttpException(409, 'There was a duplicate key error. Please try again in a bit.');
+          });
 
-      res.status(201).json({ data: newJobData, message: 'created' });
-    } catch (error) {
-      next(error);
+        res.status(201).json({ data: newJobData, message: 'created' });
+        break;
+      } catch (error) {
+        tries++;
+        if (tries === maxTries) next(error);
+      }
     }
   };
 
