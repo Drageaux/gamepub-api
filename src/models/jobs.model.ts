@@ -1,10 +1,11 @@
+import projectModel from '@models/projects.model';
 import { model, Schema, Document } from 'mongoose';
 import { Job } from '@interfaces/job.interface';
 
 const jobSchema: Schema = new Schema(
   {
     project: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
-    jobNumber: Number,
+    jobNumber: { type: Number, default: 1 },
     title: { type: String, required: true, trim: true },
     body: { type: String, trim: true },
     imageUrl: { type: String, trim: true },
