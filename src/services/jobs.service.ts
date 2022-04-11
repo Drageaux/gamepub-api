@@ -20,7 +20,7 @@ class JobsService {
     return findJob;
   }
 
-  public async updateJobByJobNumberWithFullPath(req, update): Promise<HydratedDocument<Job>> {
+  public async updateJobByJobNumberWithFullPath(req: RequestWithUser, update): Promise<HydratedDocument<Job>> {
     const jobNumber = parseInt(req.params.jobnumber as string);
     const findProject = await this.projectsService.getProjectByCreatorAndName(req);
 
