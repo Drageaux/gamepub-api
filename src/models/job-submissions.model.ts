@@ -7,8 +7,7 @@ const jobSubmissionSchema: Schema = new Schema(
     user: { type: String, required: true },
     githubRepo: { type: String, required: true, trim: true },
     body: String,
-    // counters
-    submissionNumber: { type: Number, default: 1 },
+    submissionNumber: { type: Number, required: true },
   },
   { timestamps: true },
 ).index({ job: 1, submissionNumber: 1 }, { unique: true });

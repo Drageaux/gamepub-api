@@ -26,6 +26,7 @@ export interface JobComment {
 export interface JobSubmission {
   _id: Types.ObjectId;
   job: Types.ObjectId | Job;
+  submissionNumber: number;
   githubRepo: string;
   body?: string;
   createdAt?: string | Date;
