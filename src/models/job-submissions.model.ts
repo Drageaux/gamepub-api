@@ -1,6 +1,5 @@
 import { model, Schema, Document } from 'mongoose';
-import { Job, JobSubmission } from '@interfaces/job.interface';
-import jobModel from './jobs.model';
+import { JobSubmission } from '@interfaces/job.interface';
 
 const jobSubmissionSchema: Schema = new Schema(
   {
@@ -13,24 +12,6 @@ const jobSubmissionSchema: Schema = new Schema(
   },
   { timestamps: true },
 ).index({ job: 1, submissionNumber: 1 }, { unique: true });
-
-jobSubmissionSchema.pre('save', async function (next) {
-  if (!this.isNew) {
-    next();
-    return;
-  }
-
-  // TODO: format code and don't auto increment after error
-  // auto increment submission count
-  try {
-    const updatedJob: Job = await jobModel.findByIdAndUpdate(this.job, { $inc: { submissionsCount: 1 } }, { new: true });
-    const submissionNumber = updatedJob.submissionsCount;
-    this.submissionNumber = submissionNumber;
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
 
 const jobSubmissionModel = model<JobSubmission & Document>('JobSubmission', jobSubmissionSchema);
 
