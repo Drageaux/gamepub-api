@@ -1,4 +1,3 @@
-import projectModel from '@models/projects.model';
 import { model, Schema, Document } from 'mongoose';
 import { Job } from '@interfaces/job.interface';
 

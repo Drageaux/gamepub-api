@@ -7,7 +7,7 @@ const jobSubmissionSchema: Schema = new Schema(
     job: { type: Schema.Types.ObjectId, ref: 'Job', required: true },
     user: { type: String, required: true },
     githubRepo: { type: String, required: true, trim: true },
-    description: String,
+    body: String,
     // counters
     submissionNumber: { type: Number, default: 1 },
   },
