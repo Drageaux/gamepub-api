@@ -3,12 +3,14 @@ import { HttpException } from '@/exceptions/HttpException';
 import { Project } from '@/interfaces/project.interface';
 import jobModel from '@/models/jobs.model';
 import projectsService from './projects.service';
+import { Job } from '@/interfaces/job.interface';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 class JobsService {
   public jobs = jobModel;
   private projectsService = new projectsService();
 
-  public async getJobByJobNumberWithFullPath(req) {
+  public async getJobByJobNumberWithFullPath(req: RequestWithUser): Promise<HydratedDocument<Job>> {
     const jobNumber = parseInt(req.params.jobnumber as string);
     const findProject: HydratedDocument<Project> = await this.projectsService.getProjectByCreatorAndName(req);
 
@@ -18,8 +20,18 @@ class JobsService {
     return findJob;
   }
 
+  public async updateJobByJobNumberWithFullPath(req, update): Promise<HydratedDocument<Job>> {
+    const jobNumber = parseInt(req.params.jobnumber as string);
+    const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+
+    const updateJob = await this.jobs.findOneAndUpdate({ project: findProject._id, jobNumber }, update);
+    if (!updateJob) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
+
+    return updateJob;
+  }
+
   public async getJobsByProjectWithFullPath(
-    req,
+    req: RequestWithUser,
     options: {
       populate?: boolean;
       skip?: number;
