@@ -91,7 +91,7 @@ class JobsController {
    * @param next
    */
   public createJob = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
+    if (isEmpty(req.body)) return next(new HttpException(400, 'Requires a JSON body.'));
 
     // retry 3 times, maybe unnecessary, but could be unlucky
     let tries = 0;
@@ -157,9 +157,10 @@ class JobsController {
   };
 
   public postJobComment = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
+      if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body.');
       if (!req.username) throw new HttpException(401, 'Unauthorized.');
+
       const body = req.body.body;
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const createCommentData = await this.jobComments.create({
@@ -227,7 +228,7 @@ class JobsController {
       const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const findSubmission = await this.jobSubmissions.findOne({ job: job._id, submissionNumber });
 
-      if (!findSubmission) throw new HttpException(404, 'Job submission not found');
+      if (!findSubmission) throw new HttpException(404, 'Job submission not found.');
 
       res.status(200).json({ data: findSubmission, message: 'findOne' });
     } catch (error) {
@@ -236,7 +237,7 @@ class JobsController {
   };
 
   public postSubmissionByJobNumberFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) return next(new HttpException(400, 'Requires a JSON body'));
+    if (isEmpty(req.body)) return next(new HttpException(400, 'Requires a JSON body.'));
     if (!req.username) return next(new HttpException(401, 'Unauthorized.'));
 
     // retry 3 times, maybe unnecessary, but could be unlucky
