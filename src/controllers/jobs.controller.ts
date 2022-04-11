@@ -1,3 +1,4 @@
+import { HydratedDocument } from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
 import jobModel from '@models/jobs.model';
 import projectModel from '@models/projects.model';
@@ -9,6 +10,7 @@ import { Job, JobComment } from '@interfaces/job.interface';
 import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
 import { RequestWithUser } from '@/interfaces/auth.interface';
+import { Project } from '@/interfaces/project.interface';
 
 class JobsController {
   jobs = jobModel;
@@ -98,7 +100,8 @@ class JobsController {
       try {
         // "auto"-increment jobs count to account for concurrent requests
         const findProject = await this.projectsService.getProjectByCreatorAndName(req);
-        const updatedProject = await findProject.updateOne({ $inc: { jobsCount: 1 } }, { new: true });
+        const updatedProject: HydratedDocument<Project> = await findProject.updateOne({ $inc: { jobsCount: 1 } }, { new: true });
+        console.log(updatedProject);
         // get the earliest job count, reducing likelihood of duplicate key
         const jobNumber = updatedProject.jobsCount;
         const newJobData = await this.jobs
@@ -236,11 +239,15 @@ class JobsController {
     try {
       if (!req.username) throw new HttpException(401, 'Unauthorized.');
 
-      const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      // "auto"-increment jobs count to account for concurrent requests
+      const updatedJob = await this.jobsService.updateJobByJobNumberWithFullPath(req, { $inc: { submissionsCount: 1 }, returnOriginal: false });
+      // get the earliest job count, reducing likelihood of duplicate key
+      const submissionNumber = updatedJob.submissionsCount;
       const newSubmission = await this.jobSubmissions.create({
         user: req.username,
-        job: job._id,
+        job: updatedJob._id,
         ...req.body,
+        submissionNumber,
       });
 
       res.status(201).json({ data: newSubmission, message: 'created' });
