@@ -99,8 +99,10 @@ class JobsController {
     while (true) {
       try {
         // "auto"-increment jobs count to account for concurrent requests
-        const findProject = await this.projectsService.getProjectByCreatorAndName(req);
-        const updatedProject: HydratedDocument<Project> = await findProject.updateOne({ $inc: { jobsCount: 1 } }, { new: true });
+        const updatedProject = await this.projectsService.updateProjectByCreatorAndName(req, {
+          $inc: { jobsCount: 1 },
+          returnOriginal: false,
+        });
         // get the earliest job count, reducing likelihood of duplicate key
         const jobNumber = updatedProject.jobsCount;
         const newJobData = await this.jobs
@@ -131,7 +133,7 @@ class JobsController {
    * @param res
    * @param next
    */
-  public getJobByJobNumber = async (req: Request, res: Response, next: NextFunction) => {
+  public getJobByJobNumber = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
 
@@ -141,7 +143,7 @@ class JobsController {
     }
   };
 
-  public getJobComments = async (req: Request, res: Response, next: NextFunction) => {
+  public getJobComments = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const findCommentsByJob: JobComment[] = await this.jobComments.find({
@@ -243,10 +245,13 @@ class JobsController {
     while (true) {
       try {
         // "auto"-increment jobs count to account for concurrent requests
-        const updatedJob = await this.jobsService.updateJobByJobNumberWithFullPath(req, { $inc: { submissionsCount: 1 }, returnOriginal: false });
+        const updatedJob = await this.jobsService.updateJobByJobNumberWithFullPath(req, {
+          $inc: { submissionsCount: 1 },
+          returnOriginal: false,
+        });
         // get the earliest job count, reducing likelihood of duplicate key
         const submissionNumber = updatedJob.submissionsCount;
-        const newSubmission = await this.jobSubmissions
+        const newSubmissionData = await this.jobSubmissions
           .create({
             user: req.username,
             job: updatedJob._id,
@@ -259,7 +264,7 @@ class JobsController {
             throw new HttpException(409, 'There was a duplicate key error. Please try again in a bit.');
           });
 
-        res.status(201).json({ data: newSubmission, message: 'created' });
+        res.status(201).json({ data: newSubmissionData, message: 'created' });
       } catch (error) {
         next(error);
         tries++;
