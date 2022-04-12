@@ -12,7 +12,7 @@ const assetSchema: Schema = new Schema({
   displayName: { type: String, min: 3, max: 100, required: true, trim: true },
   slug: { type: String, max: 70, required: true },
   tags: [String],
-  description: { type: String, trim: true },
+  body: { type: String, trim: true },
   private: Boolean,
 });
 

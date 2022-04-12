@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import { Job } from './job.interface';
 
 export interface Project {
   _id: Types.ObjectId;
@@ -8,6 +7,7 @@ export interface Project {
   displayName?: string;
   githubRepo?: string;
   imageUrl?: string;
-  jobsCount?: number;
   private?: boolean;
+  // counters
+  jobsCount?: number;
 }

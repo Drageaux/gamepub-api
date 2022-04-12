@@ -17,6 +17,11 @@ export class JobNumberPathParams extends ProjectPathParams {
   public jobnumber: number;
 }
 
+export class JobSubmissionPathParams extends JobNumberPathParams {
+  @IsNumberString()
+  public submissionnumber: number;
+}
+
 export class IdPathParams {
   @IsString()
   public id: string;

@@ -1,17 +1,21 @@
+import { HydratedDocument } from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
 import jobModel from '@models/jobs.model';
 import projectModel from '@models/projects.model';
+import jobCommentModel from '@/models/job-comments.model';
+import jobSubmissionModel from '@/models/job-submissions.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@exceptions/HttpException';
 import { Job, JobComment } from '@interfaces/job.interface';
 import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
-import jobCommentModel from '@/models/job-comments.model';
 import { RequestWithUser } from '@/interfaces/auth.interface';
+import { Project } from '@/interfaces/project.interface';
 
 class JobsController {
   jobs = jobModel;
   jobComments = jobCommentModel;
+  jobSubmissions = jobSubmissionModel;
   projects = projectModel;
   public projectsService = new projectsService();
   public jobsService = new jobsService();
@@ -87,7 +91,7 @@ class JobsController {
    * @param next
    */
   public createJob = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
+    if (isEmpty(req.body)) return next(new HttpException(400, 'Requires a JSON body.'));
 
     // retry 3 times, maybe unnecessary, but could be unlucky
     let tries = 0;
@@ -95,8 +99,10 @@ class JobsController {
     while (true) {
       try {
         // "auto"-increment jobs count to account for concurrent requests
-        const findProject = await this.projectsService.getProjectByCreatorAndName(req);
-        const updatedProject = await findProject.updateOne({ $inc: { jobsCount: 1 } }, { new: true });
+        const updatedProject = await this.projectsService.updateProjectByCreatorAndName(req, {
+          $inc: { jobsCount: 1 },
+          returnOriginal: false,
+        });
         // get the earliest job count, reducing likelihood of duplicate key
         const jobNumber = updatedProject.jobsCount;
         const newJobData = await this.jobs
@@ -111,11 +117,12 @@ class JobsController {
             throw new HttpException(409, 'There was a duplicate key error. Please try again in a bit.');
           });
 
-        res.status(201).json({ data: newJobData, message: 'created' });
-        break;
+        return res.status(201).json({ data: newJobData, message: 'created' });
       } catch (error) {
         tries++;
-        if (tries === maxTries) next(error);
+        if (tries === maxTries) {
+          return next(error);
+        }
       }
     }
   };
@@ -127,7 +134,7 @@ class JobsController {
    * @param res
    * @param next
    */
-  public getJobByJobNumber = async (req: Request, res: Response, next: NextFunction) => {
+  public getJobByJobNumber = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
 
@@ -137,7 +144,7 @@ class JobsController {
     }
   };
 
-  public getJobComments = async (req: Request, res: Response, next: NextFunction) => {
+  public getJobComments = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const findCommentsByJob: JobComment[] = await this.jobComments.find({
@@ -151,9 +158,10 @@ class JobsController {
   };
 
   public postJobComment = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body');
     try {
+      if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body.');
       if (!req.username) throw new HttpException(401, 'Unauthorized.');
+
       const body = req.body.body;
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const createCommentData = await this.jobComments.create({
@@ -200,6 +208,71 @@ class JobsController {
       res.status(200).json({ data: removeSubscriberData, message: 'unsubscribed' });
     } catch (error) {
       next(error);
+    }
+  };
+
+  //
+  public getSubmissionsByJobFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const allSubmissionsData = await this.jobSubmissions.find({ job: job._id });
+
+      res.status(200).json({ data: allSubmissionsData, message: 'findAll' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getSubmissionByFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const submissionNumber = parseInt(req.params.submissionnumber as string);
+      const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const findSubmission = await this.jobSubmissions.findOne({ job: job._id, submissionNumber });
+
+      if (!findSubmission) throw new HttpException(404, 'Job submission not found.');
+
+      res.status(200).json({ data: findSubmission, message: 'findOne' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public postSubmissionByJobNumberFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) return next(new HttpException(400, 'Requires a JSON body.'));
+    if (!req.username) return next(new HttpException(401, 'Unauthorized.'));
+
+    // retry 3 times, maybe unnecessary, but could be unlucky
+    let tries = 0;
+    const maxTries = 3;
+    while (true) {
+      try {
+        // "auto"-increment jobs count to account for concurrent requests
+        const updatedJob = await this.jobsService.updateJobByJobNumberWithFullPath(req, {
+          $inc: { submissionsCount: 1 },
+          returnOriginal: false,
+        });
+        // get the earliest job count, reducing likelihood of duplicate key
+        const submissionNumber = updatedJob.submissionsCount;
+        const newSubmissionData = await this.jobSubmissions
+          .create({
+            user: req.username,
+            job: updatedJob._id,
+            ...req.body,
+            submissionNumber,
+          })
+          .catch(async () => {
+            // revert incremented count if error
+            await updatedJob.updateOne({ $inc: { jobsCount: -1 } });
+            throw new HttpException(409, 'There was a duplicate key error. Please try again in a bit.');
+          });
+
+        return res.status(201).json({ data: newSubmissionData, message: 'created' });
+      } catch (error) {
+        tries++;
+        if (tries === maxTries) {
+          return next(error);
+        }
+      }
     }
   };
 }
