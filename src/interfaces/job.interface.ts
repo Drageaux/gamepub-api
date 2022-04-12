@@ -10,12 +10,13 @@ export interface Job {
   imageUrl?: string;
   subscribers?: string[];
   private?: boolean;
+  // counters
+  submissionsCount?: number;
 }
 
 export interface JobComment {
   _id: Types.ObjectId;
   user: string;
-  project: Types.ObjectId | Project;
   job: Types.ObjectId | Job;
   body: string;
   createdAt?: string | Date;
@@ -24,11 +25,10 @@ export interface JobComment {
 
 export interface JobSubmission {
   _id: Types.ObjectId;
-  user: string;
-  project: Types.ObjectId | Project;
   job: Types.ObjectId | Job;
+  submissionNumber: number;
   githubRepo: string;
-  description?: string;
+  body?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }

@@ -4,7 +4,7 @@ import JobsController from '@/controllers/jobs.controller';
 import validationMiddleware from '@/middlewares/validation.middleware';
 import { CreateJobCommentDto, CreateJobDto } from '@/dtos/jobs.dto';
 import { softCheckUser, injectUsername, requireUser } from '@/middlewares/auth.middleware';
-import { JobNumberPathParams, ProjectPathParams } from '@/dtos/params.dto';
+import { JobNumberPathParams, JobSubmissionPathParams, ProjectPathParams } from '@/dtos/params.dto';
 
 class JobsRoute implements Routes {
   public path = '/jobs';
@@ -49,6 +49,28 @@ class JobsRoute implements Routes {
       injectUsername,
       validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.unsubscribeFromAJob,
+    );
+    // JOB SUBMISSIONS, REQUIRE USERNAME, IF PUBLIC OR IF PRIVATE BUT IS OWNER
+    this.router.get(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions`,
+      requireUser,
+      injectUsername,
+      validationMiddleware(JobNumberPathParams, 'params'),
+      this.jobsController.getSubmissionsByJobFullPath,
+    );
+    this.router.post(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions`,
+      requireUser,
+      injectUsername,
+      validationMiddleware(JobNumberPathParams, 'params'),
+      this.jobsController.postSubmissionByJobNumberFullPath,
+    );
+    this.router.get(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber`,
+      requireUser,
+      injectUsername,
+      validationMiddleware(JobSubmissionPathParams, 'params'),
+      this.jobsController.getSubmissionByFullPath,
     );
     // this.router.get(`/projects/:projectid${this.path}`, this.jobsController.getJobsByProjectId);
 
