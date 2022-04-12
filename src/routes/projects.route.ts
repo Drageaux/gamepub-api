@@ -22,9 +22,9 @@ class ProjectsRoute implements Routes {
     // PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.get(
       `/users/:username${this.path}`,
+      validationMiddleware(UsernamePathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(UsernamePathParams, 'params'),
       this.projectsController.getProjectsByUsername,
     );
     this.router.get(
@@ -36,40 +36,40 @@ class ProjectsRoute implements Routes {
     );
     this.router.get(
       `${this.path}/:id`,
+      validationMiddleware(IdPathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(IdPathParams, 'params'),
       this.projectsController.getProjectById,
     );
 
     // ONLY ALLOW IF USER
     this.router.post(
       `${this.path}/check-name`,
+      validationMiddleware(CheckProjectNameDto, 'body'),
       requireUser,
       injectUsername,
-      validationMiddleware(CheckProjectNameDto, 'body'),
       this.projectsController.checkName,
     );
     this.router.post(
       `${this.path}`,
+      validationMiddleware(CreateProjectDto, 'body'),
       requireUser,
       injectUsername,
-      validationMiddleware(CreateProjectDto, 'body'),
       this.projectsController.createProject,
     );
     this.router.put(
       `${this.path}/:id/image`,
+      validationMiddleware(IdPathParams, 'params'),
       requireUser,
       injectUsername,
-      validationMiddleware(IdPathParams, 'params'),
       this.projectsController.updateProjectImage,
     );
     this.router.patch(
       `${this.path}/:id`,
-      requireUser,
-      injectUsername,
       validationMiddleware(IdPathParams, 'params'),
       validationMiddleware(PatchProjectPrivacyDto, 'body'),
+      requireUser,
+      injectUsername,
       this.projectsController.patchProjectById,
     );
     this.router.patch(
@@ -84,10 +84,10 @@ class ProjectsRoute implements Routes {
     // ADMIN ONLY
     this.router.post(
       `/admin${this.path}`,
+      validationMiddleware(AdminCreateProjectDto, 'body'),
       requireUser,
       injectUsername,
       requireAdmin,
-      validationMiddleware(AdminCreateProjectDto, 'body'),
       this.projectsController.adminCreateProject,
     );
   }
