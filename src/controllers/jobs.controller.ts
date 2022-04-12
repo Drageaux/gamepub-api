@@ -117,11 +117,12 @@ class JobsController {
             throw new HttpException(409, 'There was a duplicate key error. Please try again in a bit.');
           });
 
-        res.status(201).json({ data: newJobData, message: 'created' });
-        break;
+        return res.status(201).json({ data: newJobData, message: 'created' });
       } catch (error) {
         tries++;
-        if (tries === maxTries) next(error);
+        if (tries === maxTries) {
+          return next(error);
+        }
       }
     }
   };
@@ -265,11 +266,12 @@ class JobsController {
             throw new HttpException(409, 'There was a duplicate key error. Please try again in a bit.');
           });
 
-        res.status(201).json({ data: newSubmissionData, message: 'created' });
+        return res.status(201).json({ data: newSubmissionData, message: 'created' });
       } catch (error) {
-        next(error);
         tries++;
-        if (tries === maxTries) next(error);
+        if (tries === maxTries) {
+          return next(error);
+        }
       }
     }
   };
