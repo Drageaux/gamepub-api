@@ -141,6 +141,31 @@ class ProjectsController {
     }
   };
 
+  public patchProjectById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const projId = req.params.id;
+      const update = req.body;
+
+      const updateProject = await this.projects.findByIdAndUpdate(projId, { ...update });
+
+      res.status(200).json({ data: updateProject, message: 'updateProjectPrivacy' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public patchProjectByFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const update = req.body;
+
+      const updateProject = (await this.projectsService.getProjectByCreatorAndName(req)).updateOne({ ...update });
+
+      res.status(200).json({ data: updateProject, message: 'updateProjectPrivacy' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /*************************************************************************/
   /********************************* ADMIN *********************************/
   /*************************************************************************/
