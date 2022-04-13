@@ -211,11 +211,20 @@ class JobsController {
       const body = req.body;
 
       const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
-      const setSubscriberData = await this.jobSubscriptions
-        .findOneAndUpdate({ user: req.username, job: job._id }, body, { upsert: true, returnOriginal: false })
-        .populate('job');
+      const setSubscriberData = await this.jobSubscriptions.findOneAndUpdate({ user: req.username, job: job._id }, body, {
+        upsert: true,
+        returnOriginal: false,
+      });
 
-      res.status(200).json({ data: setSubscriberData, message: 'updatedSubscription' });
+      const jobWithSubscriptionStatus: JobWithSubscriptionStatus = {
+        ...job.toObject(),
+        subscription: {
+          accepted: setSubscriberData.accepted,
+          notified: setSubscriberData.notified,
+        },
+      };
+
+      res.status(200).json({ data: jobWithSubscriptionStatus, message: 'updatedSubscription' });
     } catch (error) {
       next(error);
     }
