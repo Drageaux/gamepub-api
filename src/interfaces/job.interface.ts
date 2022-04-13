@@ -8,7 +8,6 @@ export interface Job {
   title: string;
   body?: string;
   imageUrl?: string;
-  subscribers?: string[];
   private?: boolean;
   closed?: boolean;
   // counters
