@@ -101,7 +101,6 @@ class JobsController {
         // "auto"-increment jobs count to account for concurrent requests
         const updatedProject = await this.projectsService.updateProjectByCreatorAndName(req, {
           $inc: { jobsCount: 1 },
-          returnOriginal: false,
         });
         // get the earliest job count, reducing likelihood of duplicate key
         const jobNumber = updatedProject.jobsCount;

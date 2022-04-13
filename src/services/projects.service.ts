@@ -32,10 +32,10 @@ class ProjectsService {
     if (!findProject) throw new HttpException(404, `Project with ID ${req.params.id} does not exist`);
 
     // TODO: allow collaborators to edit
-    // does it belong to the user
+    // access check, does it belong to the user
     if (req.username !== findProject.creator) throw new HttpException(401, `Unauthorized`);
 
-    const findProjectByNameData = await this.projects.findByIdAndUpdate(req.params.id, update);
+    const findProjectByNameData = await this.projects.findByIdAndUpdate(req.params.id, update, { returnOriginal: false });
 
     return findProjectByNameData;
   }
