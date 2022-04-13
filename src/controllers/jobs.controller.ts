@@ -7,7 +7,7 @@ import jobSubmissionModel from '@/models/job-submissions.model';
 import jobSubscriptionModel from '@/models/job-subscriptions.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@exceptions/HttpException';
-import { Job, JobComment } from '@interfaces/job.interface';
+import { Job, JobComment, JobWithSubscriptionStatus } from '@interfaces/job.interface';
 import { Project } from '@/interfaces/project.interface';
 import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
@@ -27,16 +27,37 @@ class JobsController {
       // TODO: limit to 20 jobs by default, then limit to 100 max
 
       const username = req.username;
-      const findJobsWithSubscriptionStatus = await this.jobs.aggregate([
+
+      const findJobsWithSubscriptionStatus: JobWithSubscriptionStatus[] = await this.jobs.aggregate([
         {
-          $lookup: { from: 'jobsubscriptions', localField: '_id', foreignField: 'job', as: 'subscription' },
+          $lookup: {
+            from: 'jobsubscriptions',
+            localField: '_id',
+            foreignField: 'job',
+            // let: { user: '$user' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ['$user', username] },
+                },
+              },
+            ],
+            as: 'userSubscription',
+          },
         },
+        {
+          $addFields: {
+            subscription: { $mergeObjects: ['$userSubscription'] },
+          },
+        },
+        { $project: { userSubscription: 0 } },
       ]);
-      console.log(findJobsWithSubscriptionStatus);
 
-      const findJobs = await this.jobs.find({ private: { $ne: true } }).populate('project');
+      await this.jobs.populate(findJobsWithSubscriptionStatus, { path: 'project' });
 
-      res.status(200).json({ data: findJobs, message: 'findAll' });
+      // const findJobs = await this.jobs.find({ private: { $ne: true } }).populate('project');
+
+      res.status(200).json({ data: findJobsWithSubscriptionStatus, message: 'findAll' });
     } catch (error) {
       next(error);
     }
