@@ -16,7 +16,7 @@ const projectSchema: Schema = new Schema({
 }).index({ creator: 1, name: 1 }, { unique: true });
 
 projectSchema.post(/pdate$/, async function (result) {
-  const updateJobsPrivacy = await jobModel.updateMany({ project: result._id }, { private: result.private });
+  await jobModel.updateMany({ project: result._id }, { private: result.private });
 });
 
 const projectModel = model<Project & Document>('Project', projectSchema);
