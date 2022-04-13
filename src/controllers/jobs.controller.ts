@@ -234,7 +234,6 @@ class JobsController {
         // "auto"-increment jobs count to account for concurrent requests
         const updatedJob = await this.jobsService.updateJobByJobNumberWithFullPath(req, {
           $inc: { submissionsCount: 1 },
-          returnOriginal: false,
         });
         // get the earliest job count, reducing likelihood of duplicate key
         const submissionNumber = updatedJob.submissionsCount;

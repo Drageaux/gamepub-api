@@ -24,7 +24,7 @@ class JobsService {
     const jobNumber = parseInt(req.params.jobnumber as string);
     const findProject = await this.projectsService.getProjectByCreatorAndName(req);
 
-    const updateJob = await this.jobs.findOneAndUpdate({ project: findProject._id, jobNumber }, update);
+    const updateJob = await this.jobs.findOneAndUpdate({ project: findProject._id, jobNumber }, update, { returnOriginal: false });
     if (!updateJob) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
 
     return updateJob;
