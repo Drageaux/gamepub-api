@@ -10,8 +10,17 @@ export interface Job {
   imageUrl?: string;
   subscribers?: string[];
   private?: boolean;
+  closed?: boolean;
   // counters
   submissionsCount?: number;
+}
+
+export interface JobSubscription {
+  _id: Types.ObjectId;
+  user: string;
+  job: Types.ObjectId | Job;
+  accepted?: boolean;
+  notified?: boolean;
 }
 
 export interface JobComment {
