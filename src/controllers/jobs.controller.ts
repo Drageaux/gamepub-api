@@ -112,6 +112,17 @@ class JobsController {
     }
   };
 
+  public updateJobByJobNumber = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const update = req.body;
+      const findJob = await this.jobsService.updateJobByJobNumberWithFullPath(req, { ...update });
+
+      res.status(200).json({ data: findJob, message: 'findOne' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /**
    * Receive {username}, {projectname}, and {jobnumber} params to fetch a single job.
    *

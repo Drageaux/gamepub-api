@@ -74,12 +74,20 @@ class JobsRoute implements Routes {
     );
     // this.router.get(`/projects/:projectid${this.path}`, this.jobsController.getJobsByProjectId);
 
-    // JOB CREATE, PROJECT OWNER ONLY
+    // JOB CREATE & UPDATE, PROJECT OWNER ONLY
     this.router.post(
       `/users/:username/projects/:projectname${this.path}`,
       requireUser,
       injectUsername,
       validationMiddleware(ProjectPathParams, 'params'),
+      validationMiddleware(CreateJobDto, 'body'),
+      this.jobsController.createJob,
+    );
+    this.router.patch(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber`,
+      requireUser,
+      injectUsername,
+      validationMiddleware(JobNumberPathParams, 'params'),
       validationMiddleware(CreateJobDto, 'body'),
       this.jobsController.createJob,
     );

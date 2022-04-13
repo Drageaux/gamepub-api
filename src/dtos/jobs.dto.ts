@@ -15,6 +15,26 @@ export class CreateJobDto {
   public imageUrl: string;
 }
 
+export class PatchJobDto {
+  @IsString()
+  @IsOptional()
+  public title: string;
+
+  @ValidateIf((obj, val) => val != null && val != '')
+  @Length(1, 1000)
+  @IsString()
+  @IsOptional()
+  public body: string;
+
+  @IsString()
+  @IsOptional()
+  public imageUrl: string;
+
+  @IsString()
+  @IsOptional()
+  public closed: boolean;
+}
+
 export class CreateJobCommentDto {
   @Length(1, 400)
   @IsString()
