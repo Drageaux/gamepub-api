@@ -11,6 +11,7 @@ const jobSchema: Schema = new Schema(
     comments: [{ type: Schema.Types.ObjectId, ref: 'JobComment' }],
     subscribers: [String],
     private: { type: Boolean, default: false },
+    closed: { type: Boolean, default: false },
     // counters
     submissionsCount: { type: Number, default: 0 },
   },
