@@ -210,7 +210,7 @@ class JobsController {
       if (!req.username) throw new HttpException(401, 'Unauthorized.');
       const body = req.body;
 
-      const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const job = await this.jobsService.getJobByJobNumberWithFullPath(req, { populate: true });
       const setSubscriberData = await this.jobSubscriptions.findOneAndUpdate({ user: req.username, job: job._id }, body, {
         upsert: true,
         returnOriginal: false,
