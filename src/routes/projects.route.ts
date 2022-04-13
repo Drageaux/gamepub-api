@@ -42,7 +42,7 @@ class ProjectsRoute implements Routes {
       this.projectsController.getProjectById,
     );
 
-    // ONLY ALLOW IF USER
+    // ONLY ALLOW IF OWNER
     this.router.post(
       `${this.path}/check-name`,
       validationMiddleware(CheckProjectNameDto, 'body'),
