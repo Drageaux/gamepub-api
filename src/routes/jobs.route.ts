@@ -19,7 +19,7 @@ class JobsRoute implements Routes {
     // PUBLIC JOBS
     this.router.get(`${this.path}`, this.jobsController.getJobs);
 
-    // PROJECT SPECIFIC JOBS, IF PUBLIC OR IF PRIVATE BUT IS OWNER
+    // PROJECT-SPECIFIC JOB READS, IF PUBLIC OR IF PRIVATE BUT IS OWNER
     // TODO: consider private jobs
     this.router.get(
       `/users/:username/projects/:projectname${this.path}`,
@@ -35,7 +35,21 @@ class JobsRoute implements Routes {
       validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.getJobByJobNumber,
     );
-    // PROJECT SPECIFIC JOBS, REQUIRE USERNAME, IF PUBLIC OR IF PRIVATE BUT IS OWNER
+    this.router.get(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions`,
+      softCheckUser,
+      injectUsername,
+      validationMiddleware(JobNumberPathParams, 'params'),
+      this.jobsController.getSubmissionsByJobFullPath,
+    );
+    this.router.get(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber`,
+      softCheckUser,
+      injectUsername,
+      validationMiddleware(JobSubmissionPathParams, 'params'),
+      this.jobsController.getSubmissionByFullPath,
+    );
+    // PROJECT-SPECIFIC JOB UPDATES, REQUIRE USERNAME, IF PUBLIC OR IF PRIVATE BUT IS OWNER
     this.router.put(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/subscribe`,
       requireUser,
@@ -50,14 +64,7 @@ class JobsRoute implements Routes {
       validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.unsubscribeFromAJob,
     );
-    // JOB SUBMISSIONS, REQUIRE USERNAME, IF PUBLIC OR IF PRIVATE BUT IS OWNER
-    this.router.get(
-      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions`,
-      requireUser,
-      injectUsername,
-      validationMiddleware(JobNumberPathParams, 'params'),
-      this.jobsController.getSubmissionsByJobFullPath,
-    );
+    // JOB SUBMISSION CREATE, REQUIRE USERNAME, IF PUBLIC OR IF PRIVATE BUT IS OWNER
     this.router.post(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions`,
       requireUser,
@@ -65,16 +72,9 @@ class JobsRoute implements Routes {
       validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.postSubmissionByJobNumberFullPath,
     );
-    this.router.get(
-      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber`,
-      requireUser,
-      injectUsername,
-      validationMiddleware(JobSubmissionPathParams, 'params'),
-      this.jobsController.getSubmissionByFullPath,
-    );
     // this.router.get(`/projects/:projectid${this.path}`, this.jobsController.getJobsByProjectId);
 
-    // JOB'S PROJECT OWNER ONLY
+    // JOB CREATE, PROJECT OWNER ONLY
     this.router.post(
       `/users/:username/projects/:projectname${this.path}`,
       requireUser,
@@ -84,7 +84,7 @@ class JobsRoute implements Routes {
       this.jobsController.createJob,
     );
 
-    // JOB COMMENTS, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
+    // JOB COMMENT READS, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.get(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/comments`,
       softCheckUser,
@@ -92,9 +92,10 @@ class JobsRoute implements Routes {
       validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.getJobComments,
     );
+    // JOB COMMENT CREATE, REQUIRE USER, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.post(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/comments`,
-      softCheckUser,
+      requireUser,
       injectUsername,
       validationMiddleware(JobNumberPathParams, 'params'),
       validationMiddleware(CreateJobCommentDto, 'body'),
