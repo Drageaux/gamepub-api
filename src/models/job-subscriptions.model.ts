@@ -1,5 +1,5 @@
 import { model, Schema, Document } from 'mongoose';
-import { JobSubmission } from '@interfaces/job.interface';
+import { JobSubscription } from '@interfaces/job.interface';
 
 const jobSubscriptionSchema: Schema = new Schema(
   {
@@ -11,6 +11,6 @@ const jobSubscriptionSchema: Schema = new Schema(
   { timestamps: true },
 ).index({ job: 1, user: 1 }, { unique: true });
 
-const jobSubscriptionModel = model<JobSubmission & Document>('JobSubmission', jobSubscriptionSchema);
+const jobSubscriptionModel = model<JobSubscription & Document>('JobSubscription', jobSubscriptionSchema);
 
 export default jobSubscriptionModel;
