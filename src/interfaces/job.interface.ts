@@ -14,6 +14,13 @@ export interface Job {
   submissionsCount?: number;
 }
 
+export interface JobWithSubscriptionStatus extends Job {
+  subscription: {
+    notified?: boolean;
+    accepted?: boolean;
+  };
+}
+
 export interface JobSubscription {
   _id: Types.ObjectId;
   user: string;
