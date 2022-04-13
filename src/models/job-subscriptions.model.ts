@@ -9,7 +9,7 @@ const jobSubscriptionSchema: Schema = new Schema(
     notified: { type: Boolean, default: false },
   },
   { timestamps: true },
-).index({ job: 1, submissionNumber: 1 }, { unique: true });
+).index({ job: 1, user: 1 }, { unique: true });
 
 const jobSubscriptionModel = model<JobSubmission & Document>('JobSubmission', jobSubscriptionSchema);
 
