@@ -23,21 +23,21 @@ class AssetsRoute implements Routes {
     // PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.get(
       `/users/:username${this.path}`,
+      validationMiddleware(UsernamePathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(UsernamePathParams, 'params'),
       this.assetsController.getByUsername,
     );
     this.router.get(
       `${this.path}/:puid`,
+      validationMiddleware(PuidPathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(PuidPathParams, 'params'),
       this.assetsController.getOneByPuid,
     );
 
     // ONLY ALLOW IF USER
-    this.router.post(`${this.path}`, requireUser, injectUsername, validationMiddleware(CreateAssetDto, 'body'), this.assetsController.createOne);
+    this.router.post(`${this.path}`, validationMiddleware(CreateAssetDto, 'body'), requireUser, injectUsername, this.assetsController.createOne);
 
     // ADMIN ONLY
   }

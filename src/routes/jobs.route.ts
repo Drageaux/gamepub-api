@@ -23,53 +23,53 @@ class JobsRoute implements Routes {
     // TODO: consider private jobs
     this.router.get(
       `/users/:username/projects/:projectname${this.path}`,
+      validationMiddleware(ProjectPathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(ProjectPathParams, 'params'),
       this.jobsController.getJobsByProjectFullPath,
     );
     this.router.get(
       `/users/:username/projects/:projectname${this.path}/:jobnumber`,
+      validationMiddleware(JobNumberPathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.getJobByJobNumber,
     );
     this.router.get(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions`,
+      validationMiddleware(JobNumberPathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.getSubmissionsByJobFullPath,
     );
     this.router.get(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber`,
+      validationMiddleware(JobSubmissionPathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(JobSubmissionPathParams, 'params'),
       this.jobsController.getSubmissionByFullPath,
     );
     // PROJECT-SPECIFIC JOB SUBMISSIONS, REQUIRE USERNAME, IF PUBLIC OR IF PRIVATE BUT IS OWNER
     this.router.put(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/subscription`,
+      validationMiddleware(JobNumberPathParams, 'params'),
       requireUser,
       injectUsername,
-      validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.setSubscriptionForJobByJobNumber,
     );
     this.router.delete(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/subscription`,
+      validationMiddleware(JobNumberPathParams, 'params'),
       requireUser,
       injectUsername,
-      validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.unsubscribeFromAJob,
     );
     // JOB SUBMISSION CREATE, REQUIRE USERNAME, IF PUBLIC OR IF PRIVATE BUT IS OWNER
     this.router.post(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions`,
+      validationMiddleware(JobNumberPathParams, 'params'),
       requireUser,
       injectUsername,
-      validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.postSubmissionByJobNumberFullPath,
     );
     // this.router.get(`/projects/:projectid${this.path}`, this.jobsController.getJobsByProjectId);
@@ -77,36 +77,36 @@ class JobsRoute implements Routes {
     // JOB CREATE & UPDATE, PROJECT OWNER ONLY
     this.router.post(
       `/users/:username/projects/:projectname${this.path}`,
-      requireUser,
-      injectUsername,
       validationMiddleware(ProjectPathParams, 'params'),
       validationMiddleware(CreateJobDto, 'body'),
+      requireUser,
+      injectUsername,
       this.jobsController.createJob,
     );
     this.router.patch(
       `/users/:username/projects/:projectname${this.path}/:jobnumber`,
-      requireUser,
-      injectUsername,
       validationMiddleware(JobNumberPathParams, 'params'),
       validationMiddleware(CreateJobDto, 'body'),
+      requireUser,
+      injectUsername,
       this.jobsController.createJob,
     );
 
     // JOB COMMENT READS, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.get(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/comments`,
+      validationMiddleware(JobNumberPathParams, 'params'),
       softCheckUser,
       injectUsername,
-      validationMiddleware(JobNumberPathParams, 'params'),
       this.jobsController.getJobComments,
     );
     // JOB COMMENT CREATE, REQUIRE USER, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.post(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/comments`,
-      requireUser,
-      injectUsername,
       validationMiddleware(JobNumberPathParams, 'params'),
       validationMiddleware(CreateJobCommentDto, 'body'),
+      requireUser,
+      injectUsername,
       this.jobsController.postJobComment,
     );
   }
