@@ -36,6 +36,19 @@ const countComments: PipelineStage = {
   },
 };
 
+interface JobQueryOptions {
+  populate?: boolean;
+  skip?: number;
+  limit?: number;
+  countComments?: boolean;
+  countSubscriptions?: boolean;
+}
+
+interface JobsQueryOptions extends JobQueryOptions {
+  skip?: number;
+  limit?: number;
+}
+
 class JobsService {
   public jobs = jobModel;
   public comments = jobCommentModel;
@@ -43,18 +56,12 @@ class JobsService {
   public subscriptions = jobSubscriptionModel;
   private projectsService = new projectsService();
 
-  public async getJobByJobNumberWithFullPath(
-    req: RequestWithUser,
-    options?: {
-      populate?: boolean;
-    },
-  ): Promise<HydratedDocument<Job>> {
+  public async getJobByJobNumberWithFullPath(req: RequestWithUser, options?: JobQueryOptions): Promise<HydratedDocument<Job>> {
     const jobNumber = parseInt(req.params.jobnumber as string);
     const findProject: HydratedDocument<Project> = await this.projectsService.getProjectByCreatorAndName(req);
 
-    let query = this.jobs.findOne({ project: findProject._id, jobNumber });
-    if (options?.populate) query = query.populate('project');
-    const findJob = await query;
+    const findJobResults = await this.jobs.aggregate([{ $match: { project: findProject._id, jobNumber } }, ...this.buildPipeLine(options)]);
+    const findJob = findJobResults[0];
 
     if (!findJob) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
 
@@ -71,16 +78,7 @@ class JobsService {
     return updateJob;
   }
 
-  public async getJobsByProjectWithFullPath(
-    req: RequestWithUser,
-    options?: {
-      populate?: boolean;
-      skip?: number;
-      limit?: number;
-      countComments?: boolean;
-      countSubscriptions?: boolean;
-    },
-  ) {
+  public async getJobsByProjectWithFullPath(req: RequestWithUser, options?: JobsQueryOptions) {
     const findProject = await this.projectsService.getProjectByCreatorAndName(req);
 
     const aggregatePipeline: PipelineStage[] = [
@@ -89,39 +87,49 @@ class JobsService {
       { $limit: options?.limit || 20 },
     ];
 
+    const jobsWithCounts: Job[] = await this.jobs.aggregate([...aggregatePipeline, ...this.buildPipeLine(options)]);
+
+    return jobsWithCounts;
+  }
+
+  /**
+   * Build $aggregate pipeline based on query options.
+   *
+   * @param options
+   * @returns
+   */
+  private buildPipeLine(options?: JobQueryOptions) {
+    const pipeline = [];
+
     if (options?.populate !== false)
-      aggregatePipeline.push(populateProject, {
+      pipeline.push(populateProject, {
         $addFields: { project: { $arrayElemAt: ['$projects', 0] } },
       });
 
     if (options?.countComments !== false) {
-      console.log('comments');
-      aggregatePipeline.push(countComments, {
+      pipeline.push(countComments, {
         $addFields: {
           commentsCount: { $size: '$commentsData' },
         },
       });
     }
     if (options?.countSubscriptions !== false)
-      aggregatePipeline.push(countSubscriptions, {
+      pipeline.push(countSubscriptions, {
         $addFields: {
           subscriptionsCount: { $size: '$subscriptionsData' },
         },
       });
 
-    const jobsWithCounts: Job[] = await this.jobs.aggregate([
-      ...aggregatePipeline,
-      {
-        $project: {
-          projects: 0,
-          commentsData: 0,
-          submissionsData: 0,
-          subscriptionsData: 0,
-        },
+    pipeline.push({
+      $project: {
+        projects: 0,
+        commentsData: 0,
+        submissionsData: 0,
+        subscriptionsData: 0,
       },
-    ]);
+    });
 
-    return jobsWithCounts;
+    return pipeline;
   }
 }
 
