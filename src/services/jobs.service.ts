@@ -1,13 +1,46 @@
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, PipelineStage } from 'mongoose';
 import { HttpException } from '@/exceptions/HttpException';
 import { Project } from '@/interfaces/project.interface';
 import jobModel from '@/models/jobs.model';
 import projectsService from './projects.service';
 import { Job } from '@/interfaces/job.interface';
 import { RequestWithUser } from '@/interfaces/auth.interface';
+import jobCommentModel from '@/models/job-comments.model';
+import jobSubmissionModel from '@/models/job-submissions.model';
+import jobSubscriptionModel from '@/models/job-subscriptions.model';
+
+const populateProject: PipelineStage = {
+  $lookup: {
+    from: 'projects',
+    localField: 'project',
+    foreignField: '_id',
+    as: 'projects',
+  },
+};
+
+const countSubscriptions: PipelineStage = {
+  $lookup: {
+    from: 'jobsubscriptions',
+    localField: '_id',
+    foreignField: 'job',
+    as: 'subscriptionsData',
+  },
+};
+
+const countComments: PipelineStage = {
+  $lookup: {
+    from: 'jobcomments',
+    localField: '_id',
+    foreignField: 'job',
+    as: 'commentsData',
+  },
+};
 
 class JobsService {
   public jobs = jobModel;
+  public comments = jobCommentModel;
+  public submissions = jobSubmissionModel;
+  public subscriptions = jobSubscriptionModel;
   private projectsService = new projectsService();
 
   public async getJobByJobNumberWithFullPath(
@@ -44,15 +77,51 @@ class JobsService {
       populate?: boolean;
       skip?: number;
       limit?: number;
+      countComments?: boolean;
+      countSubscriptions?: boolean;
     },
   ) {
     const findProject = await this.projectsService.getProjectByCreatorAndName(req);
 
-    let query = this.jobs.find({ project: findProject._id });
-    if (options?.populate) query = query.populate('project');
-    const findJobs = await query;
+    const aggregatePipeline: PipelineStage[] = [
+      { $match: { project: findProject._id } },
+      { $skip: options?.limit || 0 },
+      { $limit: options?.limit || 20 },
+    ];
 
-    return findJobs;
+    if (options?.populate !== false)
+      aggregatePipeline.push(populateProject, {
+        $addFields: { project: { $arrayElemAt: ['$projects', 0] } },
+      });
+
+    if (options?.countComments !== false) {
+      console.log('comments');
+      aggregatePipeline.push(countComments, {
+        $addFields: {
+          commentsCount: { $size: '$commentsData' },
+        },
+      });
+    }
+    if (options?.countSubscriptions !== false)
+      aggregatePipeline.push(countSubscriptions, {
+        $addFields: {
+          subscriptionsCount: { $size: '$subscriptionsData' },
+        },
+      });
+
+    const jobsWithCounts: Job[] = await this.jobs.aggregate([
+      ...aggregatePipeline,
+      {
+        $project: {
+          projects: 0,
+          commentsData: 0,
+          submissionsData: 0,
+          subscriptionsData: 0,
+        },
+      },
+    ]);
+
+    return jobsWithCounts;
   }
 }
 
