@@ -4,7 +4,7 @@ import validationMiddleware from '@middlewares/validation.middleware';
 import AssetsController from '@/controllers/assets.controller';
 import { AdminCreateProjectDto, CheckProjectNameDto, CreateProjectDto } from '@/dtos/projects.dto';
 import { injectUsername, requireAdmin, requireUser, softCheckUser } from '@/middlewares/auth.middleware';
-import { IdPathParams, UsernamePathParams, ProjectPathParams } from '@/dtos/params.dto';
+import { IdPathParams, UsernamePathParams, ProjectPathParams, PuidPathParams } from '@/dtos/params.dto';
 import { CreateAssetDto } from '@/dtos/assets.dto';
 
 class AssetsRoute implements Routes {
@@ -32,7 +32,7 @@ class AssetsRoute implements Routes {
       `${this.path}/:puid`,
       softCheckUser,
       injectUsername,
-      validationMiddleware(IdPathParams, 'params'),
+      validationMiddleware(PuidPathParams, 'params'),
       this.assetsController.getOneByPuid,
     );
 

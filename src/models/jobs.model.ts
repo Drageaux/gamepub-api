@@ -10,15 +10,12 @@ const jobSchema: Schema = new Schema(
     imageUrl: { type: String, trim: true },
     comments: [{ type: Schema.Types.ObjectId, ref: 'JobComment' }],
     subscribers: [String],
+    private: { type: Boolean, default: false },
     // counters
     submissionsCount: { type: Number, default: 0 },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 ).index({ project: 1, jobNumber: 1 }, { unique: true });
-
-jobSchema.virtual('private').get(function () {
-  return this.project.private;
-});
 
 const jobModel = model<Job & Document>('Job', jobSchema);
 

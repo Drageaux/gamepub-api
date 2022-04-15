@@ -141,6 +141,31 @@ class ProjectsController {
     }
   };
 
+  public patchProjectById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const update = req.body;
+
+      const updateProject = await this.projectsService.updateProjectById(req, { ...update });
+
+      res.status(200).json({ data: updateProject, message: 'updateProjectPrivacy' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public patchProjectByFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const update = req.body;
+      // updateOne doesn't have the option to return the updated document
+      // so just use the logic in the service here
+      const updateProject = await this.projectsService.updateProjectByCreatorAndName(req, { ...update });
+
+      res.status(200).json({ data: updateProject, message: 'updateProject' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /*************************************************************************/
   /********************************* ADMIN *********************************/
   /*************************************************************************/

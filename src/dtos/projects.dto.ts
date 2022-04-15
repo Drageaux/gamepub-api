@@ -42,3 +42,9 @@ export class CheckProjectNameDto {
   @IsString()
   name: string;
 }
+
+export class PatchProjectPrivacyDto {
+  @IsBoolean()
+  @IsOptional()
+  private: boolean;
+}

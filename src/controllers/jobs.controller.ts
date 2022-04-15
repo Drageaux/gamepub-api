@@ -23,21 +23,7 @@ class JobsController {
   public getJobs = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // TODO: limit to 20 jobs by default, then limit to 100 max
-      const findJobs: Job[] = await this.projects
-        .aggregate()
-        .match({
-          private: { $ne: true },
-          'jobs.0': { $exists: true },
-        })
-        .lookup({
-          from: 'jobs',
-          localField: 'jobs',
-          foreignField: '_id',
-          as: 'jobs',
-        })
-        .unwind('$jobs')
-        .replaceRoot({ $mergeObjects: ['$jobs', { project: '$$ROOT' }] })
-        .project({ 'project.jobs': 0 });
+      const findJobs = await this.jobs.find({ private: { $ne: true } }).populate('project');
 
       res.status(200).json({ data: findJobs, message: 'findAll' });
     } catch (error) {
@@ -101,7 +87,6 @@ class JobsController {
         // "auto"-increment jobs count to account for concurrent requests
         const updatedProject = await this.projectsService.updateProjectByCreatorAndName(req, {
           $inc: { jobsCount: 1 },
-          returnOriginal: false,
         });
         // get the earliest job count, reducing likelihood of duplicate key
         const jobNumber = updatedProject.jobsCount;
@@ -249,7 +234,6 @@ class JobsController {
         // "auto"-increment jobs count to account for concurrent requests
         const updatedJob = await this.jobsService.updateJobByJobNumberWithFullPath(req, {
           $inc: { submissionsCount: 1 },
-          returnOriginal: false,
         });
         // get the earliest job count, reducing likelihood of duplicate key
         const submissionNumber = updatedJob.submissionsCount;
