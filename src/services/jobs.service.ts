@@ -3,7 +3,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import { Project } from '@/interfaces/project.interface';
 import jobModel from '@/models/jobs.model';
 import projectsService from './projects.service';
-import { Job } from '@/interfaces/job.interface';
+import { Job, JobWithSubscriptionStatus } from '@/interfaces/job.interface';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import jobCommentModel from '@/models/job-comments.model';
 import jobSubmissionModel from '@/models/job-submissions.model';
@@ -16,6 +16,25 @@ const populateProject: PipelineStage = {
     foreignField: '_id',
     as: 'projects',
   },
+};
+
+const includeSubscriptionFrom = (username: string): PipelineStage => {
+  return {
+    $lookup: {
+      from: 'jobsubscriptions',
+      localField: '_id',
+      foreignField: 'job',
+      // let: { user: '$user' },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ['$user', username] },
+          },
+        },
+      ],
+      as: 'userSubscription',
+    },
+  };
 };
 
 const countSubscriptions: PipelineStage = {
@@ -37,11 +56,13 @@ const countComments: PipelineStage = {
 };
 
 interface JobQueryOptions {
-  populate?: boolean;
-  skip?: number;
-  limit?: number;
-  countComments?: boolean;
-  countSubscriptions?: boolean;
+  match?: any;
+  populate?: boolean; // default: true
+  skip?: number; // default: 0
+  limit?: number; // default: 20
+  includeSubscription?: boolean; // default: false
+  countComments?: boolean; // default: true
+  countSubscriptions?: boolean; // default: true
 }
 
 interface JobsQueryOptions extends JobQueryOptions {
@@ -56,6 +77,18 @@ class JobsService {
   public subscriptions = jobSubscriptionModel;
   private projectsService = new projectsService();
 
+  public async getPublicJobs(req: RequestWithUser, options?: JobsQueryOptions) {
+    const aggregatePipeline: PipelineStage[] = [
+      { $match: { private: { $ne: true } } },
+      { $skip: options?.limit || 0 },
+      { $limit: options?.limit || 20 },
+      ...this.buildPipeLine(options, req.username),
+    ];
+    const jobsWithCounts: (Job | JobWithSubscriptionStatus)[] = await this.jobs.aggregate([...aggregatePipeline]);
+
+    return jobsWithCounts;
+  }
+
   public async getJobByJobNumberWithFullPath(req: RequestWithUser, options?: JobQueryOptions): Promise<HydratedDocument<Job>> {
     const jobNumber = parseInt(req.params.jobnumber as string);
     const findProject: HydratedDocument<Project> = await this.projectsService.getProjectByCreatorAndName(req);
@@ -68,6 +101,22 @@ class JobsService {
     return findJob;
   }
 
+  public async getJobsByProjectWithFullPath(req: RequestWithUser, options?: JobsQueryOptions) {
+    const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+
+    const aggregatePipeline: PipelineStage[] = [
+      { $match: { project: findProject._id } },
+      { $skip: options?.limit || 0 },
+      { $limit: options?.limit || 20 },
+    ];
+    const jobsWithCounts: (Job | JobWithSubscriptionStatus)[] = await this.jobs.aggregate([
+      ...aggregatePipeline,
+      ...this.buildPipeLine(options, req.username),
+    ]);
+
+    return jobsWithCounts;
+  }
+
   public async updateJobByJobNumberWithFullPath(req: RequestWithUser, update): Promise<HydratedDocument<Job>> {
     const jobNumber = parseInt(req.params.jobnumber as string);
     const findProject = await this.projectsService.getProjectByCreatorAndName(req);
@@ -78,33 +127,27 @@ class JobsService {
     return updateJob;
   }
 
-  public async getJobsByProjectWithFullPath(req: RequestWithUser, options?: JobsQueryOptions) {
-    const findProject = await this.projectsService.getProjectByCreatorAndName(req);
-
-    const aggregatePipeline: PipelineStage[] = [
-      { $match: { project: findProject._id } },
-      { $skip: options?.limit || 0 },
-      { $limit: options?.limit || 20 },
-    ];
-
-    const jobsWithCounts: Job[] = await this.jobs.aggregate([...aggregatePipeline, ...this.buildPipeLine(options)]);
-
-    return jobsWithCounts;
-  }
-
   /**
    * Build $aggregate pipeline based on query options.
    *
    * @param options
    * @returns
    */
-  private buildPipeLine(options?: JobQueryOptions) {
+  private buildPipeLine(options?: JobQueryOptions, username?: string) {
     const pipeline = [];
 
     if (options?.populate !== false)
       pipeline.push(populateProject, {
         $addFields: { project: { $arrayElemAt: ['$projects', 0] } },
       });
+
+    if (options?.includeSubscription && username) {
+      pipeline.push(
+        includeSubscriptionFrom(username),
+        { $addFields: { subscription: { $mergeObjects: ['$userSubscription'] } } },
+        { $project: { userSubscription: 0 } },
+      );
+    }
 
     if (options?.countComments !== false) {
       pipeline.push(countComments, {
