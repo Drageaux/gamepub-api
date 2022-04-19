@@ -131,6 +131,7 @@ class JobsService {
    * Build $aggregate pipeline based on query options.
    *
    * @param options
+   * @param username required if includeSubscription is enabled
    * @returns
    */
   private buildPipeLine(options?: JobQueryOptions, username?: string) {
