@@ -217,7 +217,7 @@ class JobsController {
       });
 
       const jobWithSubscriptionStatus: JobWithSubscriptionStatus = {
-        ...job.toObject(),
+        ...job,
         subscription: {
           accepted: setSubscriberData.accepted,
           notified: setSubscriberData.notified,
