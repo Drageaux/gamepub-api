@@ -1,4 +1,4 @@
-import { IsOptional, IsString, Length, ValidateIf } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
 
 export class CreateJobDto {
   @IsString()
@@ -50,4 +50,12 @@ export class CreateJobSubmissionDto {
   @IsString()
   @IsOptional()
   public body: string;
+}
+
+export class UpdateJobSubscriptionDto {
+  @IsBoolean()
+  public accepted: boolean;
+
+  @IsBoolean()
+  public notified: boolean;
 }

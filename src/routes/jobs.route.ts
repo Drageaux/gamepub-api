@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import JobsController from '@/controllers/jobs.controller';
 import validationMiddleware from '@/middlewares/validation.middleware';
-import { CreateJobCommentDto, CreateJobDto } from '@/dtos/jobs.dto';
+import { CreateJobCommentDto, CreateJobDto, UpdateJobSubscriptionDto } from '@/dtos/jobs.dto';
 import { softCheckUser, injectUsername, requireUser } from '@/middlewares/auth.middleware';
 import { JobNumberPathParams, JobSubmissionPathParams, ProjectPathParams } from '@/dtos/params.dto';
 
@@ -53,6 +53,7 @@ class JobsRoute implements Routes {
     this.router.put(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/subscription`,
       validationMiddleware(JobNumberPathParams, 'params'),
+      validationMiddleware(UpdateJobSubscriptionDto, 'body'),
       requireUser,
       injectUsername,
       this.jobsController.setSubscriptionForJobByJobNumber,
