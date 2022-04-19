@@ -44,7 +44,7 @@ class JobsController {
   public getJobsByProjectFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       // TODO: skip and limit in query
-      const jobs = await this.jobsService.getJobsByProjectWithFullPath(req, { populate: true });
+      const jobs = await this.jobsService.getJobsByProjectWithFullPath(req, { includeSubscription: true });
 
       res.status(200).json({ data: jobs, message: 'findByProject' });
     } catch (error) {
