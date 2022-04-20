@@ -1,4 +1,4 @@
-import { IsOptional, IsString, Length, ValidateIf } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
 
 export class CreateJobDto {
   @IsString()
@@ -13,6 +13,26 @@ export class CreateJobDto {
   @IsString()
   @IsOptional()
   public imageUrl: string;
+}
+
+export class PatchJobDto {
+  @IsString()
+  @IsOptional()
+  public title: string;
+
+  @ValidateIf((obj, val) => val != null && val != '')
+  @Length(1, 1000)
+  @IsString()
+  @IsOptional()
+  public body: string;
+
+  @IsString()
+  @IsOptional()
+  public imageUrl: string;
+
+  @IsString()
+  @IsOptional()
+  public closed: boolean;
 }
 
 export class CreateJobCommentDto {
@@ -30,4 +50,12 @@ export class CreateJobSubmissionDto {
   @IsString()
   @IsOptional()
   public body: string;
+}
+
+export class UpdateJobSubscriptionDto {
+  @IsBoolean()
+  public accepted: boolean;
+
+  @IsBoolean()
+  public notified: boolean;
 }

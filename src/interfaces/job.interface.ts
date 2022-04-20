@@ -2,16 +2,32 @@ import { Types } from 'mongoose';
 import { Project } from './project.interface';
 
 export interface Job {
-  _id: Types.ObjectId;
+  _id?: Types.ObjectId;
   project: Types.ObjectId | Project; // Project._id
   jobNumber?: number;
   title: string;
   body?: string;
   imageUrl?: string;
-  subscribers?: string[];
   private?: boolean;
+  closed?: boolean;
   // counters
   submissionsCount?: number;
+  [key: string]: any;
+}
+
+export interface JobWithSubscriptionStatus extends Job {
+  subscription: {
+    notified?: boolean;
+    accepted?: boolean;
+  };
+}
+
+export interface JobSubscription {
+  _id: Types.ObjectId;
+  user: string;
+  job: Types.ObjectId | Job;
+  accepted?: boolean;
+  notified?: boolean;
 }
 
 export interface JobComment {

@@ -9,8 +9,8 @@ const jobSchema: Schema = new Schema(
     body: { type: String, trim: true },
     imageUrl: { type: String, trim: true },
     comments: [{ type: Schema.Types.ObjectId, ref: 'JobComment' }],
-    subscribers: [String],
     private: { type: Boolean, default: false },
+    closed: { type: Boolean, default: false },
     // counters
     submissionsCount: { type: Number, default: 0 },
   },

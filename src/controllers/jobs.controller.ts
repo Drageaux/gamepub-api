@@ -4,28 +4,31 @@ import jobModel from '@models/jobs.model';
 import projectModel from '@models/projects.model';
 import jobCommentModel from '@/models/job-comments.model';
 import jobSubmissionModel from '@/models/job-submissions.model';
+import jobSubscriptionModel from '@/models/job-subscriptions.model';
 import { isEmpty } from '@utils/util';
 import { HttpException } from '@exceptions/HttpException';
-import { Job, JobComment } from '@interfaces/job.interface';
+import { Job, JobComment, JobWithSubscriptionStatus } from '@interfaces/job.interface';
 import projectsService from '@services/projects.service';
 import jobsService from '@/services/jobs.service';
 import { RequestWithUser } from '@/interfaces/auth.interface';
-import { Project } from '@/interfaces/project.interface';
 
 class JobsController {
   jobs = jobModel;
   jobComments = jobCommentModel;
   jobSubmissions = jobSubmissionModel;
+  jobSubscriptions = jobSubscriptionModel;
   projects = projectModel;
   public projectsService = new projectsService();
   public jobsService = new jobsService();
 
-  public getJobs = async (req: Request, res: Response, next: NextFunction) => {
+  public getJobs = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       // TODO: limit to 20 jobs by default, then limit to 100 max
-      const findJobs = await this.jobs.find({ private: { $ne: true } }).populate('project');
+      const findJobsWithSubscriptionStatus = await this.jobsService.getPublicJobs(req, {
+        includeSubscription: true,
+      });
 
-      res.status(200).json({ data: findJobs, message: 'findAll' });
+      res.status(200).json({ data: findJobsWithSubscriptionStatus, message: 'findAll' });
     } catch (error) {
       next(error);
     }
@@ -41,7 +44,7 @@ class JobsController {
   public getJobsByProjectFullPath = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       // TODO: skip and limit in query
-      const jobs = await this.jobsService.getJobsByProjectWithFullPath(req, { populate: true });
+      const jobs = await this.jobsService.getJobsByProjectWithFullPath(req, { includeSubscription: true });
 
       res.status(200).json({ data: jobs, message: 'findByProject' });
     } catch (error) {
@@ -112,6 +115,17 @@ class JobsController {
     }
   };
 
+  public updateJobByJobNumber = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const update = req.body;
+      const findJob = await this.jobsService.updateJobByJobNumberWithFullPath(req, { ...update });
+
+      res.status(200).json({ data: findJob, message: 'findOne' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /**
    * Receive {username}, {projectname}, and {jobnumber} params to fetch a single job.
    *
@@ -162,18 +176,27 @@ class JobsController {
     }
   };
 
-  public subscribeToAJob = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public setSubscriptionForJobByJobNumber = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       if (!req.username) throw new HttpException(401, 'Unauthorized.');
+      const body = req.body;
 
-      const jobNumber = parseInt(req.params.jobnumber as string);
-      const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+      const job: Job = await this.jobsService.getJobByJobNumberWithFullPath(req, { populate: true });
+      const setSubscriberData = await this.jobSubscriptions.findOneAndUpdate({ user: req.username, job: job._id }, body, {
+        upsert: true,
+        returnOriginal: false,
+      });
 
-      const addSubscriberData = await this.jobs
-        .findOneAndUpdate({ project: findProject._id, jobNumber }, { $addToSet: { subscribers: req.username } }, { new: true })
-        .populate('project');
+      // format returned result
+      const jobWithSubscriptionStatus: JobWithSubscriptionStatus = {
+        ...job,
+        subscription: {
+          accepted: setSubscriberData.accepted,
+          notified: setSubscriberData.notified,
+        },
+      };
 
-      res.status(200).json({ data: addSubscriberData, message: 'subscribed' });
+      res.status(200).json({ data: jobWithSubscriptionStatus, message: 'updatedSubscription' });
     } catch (error) {
       next(error);
     }
@@ -183,14 +206,10 @@ class JobsController {
     try {
       if (!req.username) throw new HttpException(401, 'Unauthorized.');
 
-      const jobNumber = parseInt(req.params.jobnumber as string);
-      const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+      const job = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      await this.jobSubscriptions.findOneAndRemove({ user: req.username, job: job._id });
 
-      const removeSubscriberData = await this.jobs
-        .findOneAndUpdate({ project: findProject._id, jobNumber }, { $pull: { subscribers: req.username } }, { new: true })
-        .populate('project');
-
-      res.status(200).json({ data: removeSubscriberData, message: 'unsubscribed' });
+      res.status(204).json({ message: 'unsubscribed' });
     } catch (error) {
       next(error);
     }
