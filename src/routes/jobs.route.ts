@@ -101,6 +101,14 @@ class JobsRoute implements Routes {
       injectUsername,
       this.jobsController.getJobComments,
     );
+    this.router.get(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber/comments`,
+      validationMiddleware(JobSubmissionPathParams, 'params'),
+      softCheckUser,
+      injectUsername,
+      this.jobsController.getSubmissionComments,
+    );
+
     // JOB COMMENT CREATE, REQUIRE USER, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.post(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/comments`,
@@ -109,6 +117,14 @@ class JobsRoute implements Routes {
       requireUser,
       injectUsername,
       this.jobsController.postJobComment,
+    );
+    this.router.post(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber/comments`,
+      validationMiddleware(JobSubmissionPathParams, 'params'),
+      validationMiddleware(CreateJobCommentDto, 'body'),
+      requireUser,
+      injectUsername,
+      this.jobsController.postSubmissionComment,
     );
   }
 }

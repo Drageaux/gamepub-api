@@ -34,6 +34,7 @@ export interface JobComment {
   _id: Types.ObjectId;
   user: string;
   job: Types.ObjectId | Job;
+  submissionNumber?: number;
   body: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
