@@ -158,11 +158,28 @@ class JobsService {
       });
     }
     if (options?.countSubscriptions !== false)
-      pipeline.push(countSubscriptions, {
-        $addFields: {
-          subscriptionsCount: { $size: '$subscriptionsData' },
+      pipeline.push(
+        countSubscriptions,
+        {
+          $addFields: {
+            collaboratorsData: {
+              $filter: {
+                input: '$subscriptionsData',
+                as: 'sub_field',
+                cond: {
+                  $eq: ['$$sub_field.accepted', true],
+                },
+              },
+            },
+          },
         },
-      });
+        {
+          $addFields: {
+            subscriptionsCount: { $size: '$subscriptionsData' },
+            collaboratorsCount: { $size: '$collaboratorsData' },
+          },
+        },
+      );
 
     pipeline.push({
       $project: {
@@ -170,6 +187,7 @@ class JobsService {
         commentsData: 0,
         submissionsData: 0,
         subscriptionsData: 0,
+        collaboratorsData: 0,
       },
     });
 
