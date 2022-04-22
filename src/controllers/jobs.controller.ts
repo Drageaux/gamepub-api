@@ -135,7 +135,7 @@ class JobsController {
    */
   public getJobByJobNumber = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
-      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req, { includeSubscription: true });
 
       res.status(200).json({ data: findJob, message: 'findOne' });
     } catch (error) {
@@ -147,8 +147,11 @@ class JobsController {
     try {
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const findCommentsByJob: JobComment[] = await this.jobComments.find({
-        job: findJob._id,
-        submissionNumber: { $or: [{ $exists: false }, { $in: [0, null, undefined] }] }, // avoid getting submission thread chat
+        $and: [
+          { job: findJob._id },
+          // avoid getting submission thread chat
+          { $or: [{ submissionNumber: { $exists: false } }, { submissionNumber: 0 }] },
+        ],
       });
 
       res.status(200).json({ data: findCommentsByJob, message: 'findAll' });
