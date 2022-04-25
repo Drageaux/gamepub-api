@@ -25,13 +25,16 @@ class ProjectsService {
     return findProjectByNameData;
   }
 
+  /*************************************************************************/
+  /******************** OWNER OR PRIVILEGED TEAM MEMBERS *******************/
+  /*************************************************************************/
   public async updateProjectById(req: RequestWithUser, update): Promise<HydratedDocument<Project>> {
     if (!req.username) throw new HttpException(401, `Unauthorized`);
 
     const findProject = await this.projects.findById(req.params.id);
     if (!findProject) throw new HttpException(404, `Project with ID ${req.params.id} does not exist`);
 
-    // TODO: allow collaborators to edit
+    // TODO: allow certain team members to edit
     // access check, does it belong to the user
     if (req.username !== findProject.creator) throw new HttpException(401, `Unauthorized`);
 
@@ -44,7 +47,7 @@ class ProjectsService {
     const username: string = (req.params.username as string).toLocaleLowerCase();
     const projectname: string = (req.params.projectname as string).toLocaleLowerCase();
 
-    // TODO: allow collaborators to edit
+    // TODO: allow certain team members to edit
     // TODO: what if user is deleted and the project can't be found this way?
 
     // access check, does it belong to the user
