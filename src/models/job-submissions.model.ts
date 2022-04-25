@@ -8,6 +8,7 @@ const jobSubmissionSchema: Schema = new Schema(
     user: { type: String, required: true },
     githubRepo: { type: String, required: true, trim: true },
     body: String,
+    status: { type: String, enum: ['OPEN', 'APPROVED', 'CHANGEREQUESTED', 'MERGED', 'CLOSED'], default: 'OPEN' },
   },
   { timestamps: true },
 ).index({ job: 1, submissionNumber: 1 }, { unique: true });

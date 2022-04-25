@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { Routes } from '@interfaces/routes.interface';
 import JobsController from '@/controllers/jobs.controller';
 import validationMiddleware from '@/middlewares/validation.middleware';
-import { CreateJobCommentDto, CreateJobDto, UpdateJobSubscriptionDto } from '@/dtos/jobs.dto';
+import { CreateJobCommentDto, CreateJobDto, UpdateJobSubmissionStatusDto, UpdateJobSubscriptionDto } from '@/dtos/jobs.dto';
 import { softCheckUser, injectUsername, requireUser } from '@/middlewares/auth.middleware';
 import { JobNumberPathParams, JobSubmissionPathParams, ProjectPathParams } from '@/dtos/params.dto';
 
@@ -92,6 +92,15 @@ class JobsRoute implements Routes {
       injectUsername,
       this.jobsController.createJob,
     );
+    // JOB SUBMISSION STATUS UPDATE, REQUIRE OWNER
+    this.router.put(
+      `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber/status`,
+      validationMiddleware(JobSubmissionPathParams, 'params'),
+      validationMiddleware(UpdateJobSubmissionStatusDto, 'body'),
+      requireUser,
+      injectUsername,
+      this.jobsController.updateJobSubmissionStatus,
+    );
 
     // JOB COMMENT READS, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.get(
@@ -118,6 +127,7 @@ class JobsRoute implements Routes {
       injectUsername,
       this.jobsController.postJobComment,
     );
+    // JOB COMMENT CREATE, REQUIRE USER, PUBLIC OR ALLOW PRIVATE IF IS SAME USER
     this.router.post(
       `/users/:username/projects/:projectname${this.path}/:jobnumber/submissions/:submissionnumber/comments`,
       validationMiddleware(JobSubmissionPathParams, 'params'),

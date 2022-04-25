@@ -48,4 +48,13 @@ export interface JobSubmission {
   body?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
+  status;
+}
+
+export enum SubmissionStatusEnum {
+  OPEN,
+  APPROVED,
+  CHANGE_REQUESTED,
+  MERGED,
+  CLOSED,
 }
