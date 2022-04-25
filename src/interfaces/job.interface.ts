@@ -34,6 +34,7 @@ export interface JobComment {
   _id: Types.ObjectId;
   user: string;
   job: Types.ObjectId | Job;
+  submissionNumber?: number;
   body: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
@@ -47,4 +48,13 @@ export interface JobSubmission {
   body?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
+  status;
+}
+
+export enum SubmissionStatusEnum {
+  OPEN,
+  APPROVED,
+  CHANGE_REQUESTED,
+  MERGED,
+  CLOSED,
 }

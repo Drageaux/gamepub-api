@@ -1,4 +1,5 @@
-import { IsBoolean, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
+import { SubmissionStatusEnum } from '@/interfaces/job.interface';
+import { IsBoolean, IsEnum, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
 
 export class CreateJobDto {
   @IsString()
@@ -58,4 +59,9 @@ export class UpdateJobSubscriptionDto {
 
   @IsBoolean()
   public notified: boolean;
+}
+
+export class UpdateJobSubmissionStatusDto {
+  @IsEnum(SubmissionStatusEnum)
+  public status: SubmissionStatusEnum;
 }

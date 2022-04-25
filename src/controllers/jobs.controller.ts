@@ -135,7 +135,7 @@ class JobsController {
    */
   public getJobByJobNumber = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
-      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req, { includeSubscription: true });
 
       res.status(200).json({ data: findJob, message: 'findOne' });
     } catch (error) {
@@ -147,7 +147,11 @@ class JobsController {
     try {
       const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
       const findCommentsByJob: JobComment[] = await this.jobComments.find({
-        job: findJob._id,
+        $and: [
+          { job: findJob._id },
+          // avoid getting submission thread chat
+          { $or: [{ submissionNumber: { $exists: false } }, { submissionNumber: 0 }] },
+        ],
       });
 
       res.status(200).json({ data: findCommentsByJob, message: 'findAll' });
@@ -168,6 +172,45 @@ class JobsController {
         project: findJob.project,
         job: findJob._id,
         body,
+      });
+
+      res.status(201).json({ data: createCommentData, message: 'created' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getSubmissionComments = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      const submissionNumber = req.params.submissionnumber;
+
+      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const findCommentsByJobSubmission: JobComment[] = await this.jobComments.find({
+        job: findJob._id,
+        submissionNumber,
+      });
+
+      res.status(200).json({ data: findCommentsByJobSubmission, message: 'findBySubmission' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public postSubmissionComment = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    try {
+      if (isEmpty(req.body)) throw new HttpException(400, 'Requires a JSON body.');
+      if (!req.username) throw new HttpException(401, 'Unauthorized.');
+
+      const submissionNumber = req.params.submissionnumber;
+
+      const body = req.body.body;
+      const findJob = await this.jobsService.getJobByJobNumberWithFullPath(req);
+      const createCommentData = await this.jobComments.create({
+        user: req.username,
+        project: findJob.project,
+        job: findJob._id,
+        body,
+        submissionNumber,
       });
 
       res.status(201).json({ data: createCommentData, message: 'created' });
@@ -276,6 +319,22 @@ class JobsController {
           return next(error);
         }
       }
+    }
+  };
+
+  public updateJobSubmissionStatus = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) return next(new HttpException(400, 'Requires a JSON body.'));
+    if (!req.username) return next(new HttpException(401, 'Unauthorized.'));
+
+    try {
+      const { status } = req.body;
+      const updateSubmissionStatus = await this.jobsService.updateJobSubmissionWithFullPath(req, { status });
+
+      if (!updateSubmissionStatus) throw new HttpException(404, 'Job submission not found.');
+
+      res.status(200).json({ data: updateSubmissionStatus, message: 'updateStatus' });
+    } catch (error) {
+      next(error);
     }
   };
 }

@@ -5,6 +5,7 @@ const jobCommentSchema: Schema = new Schema(
   {
     job: { type: Schema.Types.ObjectId, ref: 'Job', required: true },
     user: { type: String, required: true },
+    submissionNumber: { type: Number, default: 0 }, // optional, denoting that it belongs to a thread
     body: { type: String, required: true, trim: true },
   },
   { timestamps: true },
