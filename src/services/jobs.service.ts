@@ -3,7 +3,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import { Project } from '@/interfaces/project.interface';
 import jobModel from '@/models/jobs.model';
 import projectsService from './projects.service';
-import { Job, JobWithSubscriptionStatus } from '@/interfaces/job.interface';
+import { Job, JobSubmission, JobWithSubscriptionStatus } from '@/interfaces/job.interface';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import jobCommentModel from '@/models/job-comments.model';
 import jobSubmissionModel from '@/models/job-submissions.model';
@@ -125,6 +125,18 @@ class JobsService {
     if (!updateJob) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
 
     return updateJob;
+  }
+
+  public async updateJobSubmissionWithFullPath(req: RequestWithUser, update): Promise<HydratedDocument<JobSubmission>> {
+    const jobNumber = parseInt(req.params.jobnumber as string);
+    const submissionNumber = parseInt(req.params.submissionnumber as string);
+    const findProject = await this.projectsService.getProjectByCreatorAndName(req);
+    const findJob = await this.jobs.findOne({ project: findProject._id, jobNumber });
+
+    const updateSubmission = await this.submissions.findOneAndUpdate({ _id: findJob._id, submissionNumber }, update, { returnOriginal: false });
+    if (!updateSubmission) throw new HttpException(404, `Job #${jobNumber} doesn't exist`);
+
+    return updateSubmission;
   }
 
   /**

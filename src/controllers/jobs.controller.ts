@@ -321,6 +321,22 @@ class JobsController {
       }
     }
   };
+
+  public updateJobSubmissionStatus = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    if (isEmpty(req.body)) return next(new HttpException(400, 'Requires a JSON body.'));
+    if (!req.username) return next(new HttpException(401, 'Unauthorized.'));
+
+    try {
+      const { status } = req.body;
+      const updateSubmissionStatus = await this.jobsService.updateJobSubmissionWithFullPath(req, { status });
+
+      if (!updateSubmissionStatus) throw new HttpException(404, 'Job submission not found.');
+
+      res.status(200).json({ data: updateSubmissionStatus, message: 'updateStatus' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default JobsController;
