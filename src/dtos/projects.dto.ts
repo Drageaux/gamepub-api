@@ -21,7 +21,7 @@ export class CreateProjectDto {
 
   @IsString()
   @IsOptional()
-  public description: string;
+  public body: string;
 
   @IsString()
   @IsOptional()
