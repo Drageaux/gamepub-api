@@ -13,6 +13,7 @@ class JobsRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}/unity/:packagename`, this.packagesController.getUnityRegistryPackage);
+    this.router.get(`${this.path}/openupm/:packagename`, this.packagesController.getOpenUpmRegistryPackage);
   }
 }
 
