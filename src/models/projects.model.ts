@@ -9,7 +9,7 @@ const projectSchema: Schema = new Schema({
   displayName: { type: String, min: 3, max: 100, trim: true },
   imageUrl: { type: String, trim: true },
   tags: [String],
-  description: { type: String, trim: true },
+  body: { type: String, max: 8000, trim: true },
   private: Boolean,
   // counters
   jobsCount: { type: Number, default: 0 },
